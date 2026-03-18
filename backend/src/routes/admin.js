@@ -5,17 +5,6 @@ import { requireAdmin } from '../middleware/auth.js'
 const router = Router()
 const prisma = new PrismaClient()
 
-// Route temporaire de setup admin (à supprimer après usage)
-router.post('/setup-first-admin', async (req, res) => {
-  const { email, secret } = req.body
-  if (secret !== process.env.JWT_SECRET) return res.status(403).json({ error: 'Interdit' })
-  const user = await prisma.user.update({
-    where: { email },
-    data: { isAdmin: true, isApproved: true },
-  })
-  res.json({ message: 'Admin activé', email: user.email })
-})
-
 // GET all users (admin)
 router.get('/users', requireAdmin, async (req, res) => {
   const users = await prisma.user.findMany({
