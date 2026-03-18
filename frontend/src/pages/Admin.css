@@ -1,0 +1,89 @@
+.admin-page {
+  padding: 48px 0 80px;
+}
+
+.admin-page h1 {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 40px;
+}
+
+.admin-section {
+  margin-bottom: 48px;
+}
+
+.admin-section h2 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-empty {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  padding: 20px 0;
+}
+
+.admin-loading {
+  color: var(--color-text-secondary);
+  padding: 40px 0;
+}
+
+.admin-table {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.admin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--color-bg);
+  gap: 16px;
+}
+.admin-row:not(:last-child) {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.admin-user-info strong { font-size: 14px; }
+.admin-user-info span { font-size: 13px; color: var(--color-text-secondary); }
+.admin-date { font-size: 12px; }
+
+.admin-user-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-ghost.danger {
+  color: #C62828;
+  border-color: #FFCDD2;
+}
+.btn-ghost.danger:hover { border-color: #C62828; }
+
+.tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.tag-item { display: flex; align-items: center; gap: 4px; }
+.tag-remove { background: none; border: none; cursor: pointer; color: var(--color-text-secondary); font-size: 16px; padding: 0 2px; line-height: 1; }
+.tag-remove:hover { color: var(--color-text); }
+.tag-add { display: flex; gap: 8px; align-items: center; }
+.tag-add input { border: 1px solid var(--color-border); border-radius: var(--radius); padding: 9px 14px; font-size: 14px; font-family: inherit; outline: none; }
+.tag-add input:focus { border-color: var(--color-accent); }

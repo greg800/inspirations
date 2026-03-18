@@ -1,0 +1,39 @@
+.auth-page {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.auth-box h1 {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.auth-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.btn.full { width: 100%; }
+
+.auth-link {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.auth-link a {
+  color: var(--color-accent);
+  font-weight: 500;
+}

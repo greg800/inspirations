@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  password   String
+  name       String
+  isApproved Boolean   @default(false)
+  isAdmin    Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  contents   Content[]
+  reviews    Review[]
+  votes      Vote[]
+}
+
+model Content {
+  id          Int       @id @default(autoincrement())
+  title       String
+  author      String
+  coverImage  String
+  summary     String
+  whyRead     String
+  rating      Float
+  sponsor     String
+  support     String?
+  genre       String?
+  url         String?
+  publishDate DateTime?
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  reviews     Review[]
+  votes       Vote[]
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  type      String   // "support" ou "genre"
+  value     String
+  createdAt DateTime @default(now())
+  @@unique([type, value])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Float
+  comment   String
+  userId    Int
+  contentId Int
+  user      User     @relation(fields: [userId], references: [id])
+  content   Content  @relation(fields: [contentId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, contentId])
+}
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  type      String   // "UP" | "DOWN"
+  userId    Int
+  contentId Int
+  user      User     @relation(fields: [userId], references: [id])
+  content   Content  @relation(fields: [contentId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, contentId])
+}
