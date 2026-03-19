@@ -39,8 +39,6 @@ export default function Admin() {
     setUsers(us => us.filter(u => u.id !== id))
   }
 
-  const members = users.filter(u => !u.isAdmin)
-
   return (
     <div className="admin-page">
       <div className="container">
@@ -52,19 +50,40 @@ export default function Admin() {
           <>
             <section className="admin-section">
               <h2>Comptes membres</h2>
-              {members.length === 0 ? (
+              {users.length === 0 ? (
                 <p className="admin-empty">Aucun membre.</p>
               ) : (
                 <div className="admin-table">
-                  {members.map(u => (
+                  <div className="admin-row admin-row-header">
+                    <div className="admin-user-info" />
+                    <div className="admin-stats-header">
+                      <span title="Publications">📝</span>
+                      <span title="Avis">💬</span>
+                      <span title="Pouces vers le haut">👍</span>
+                      <span title="Pouces vers le bas">👎</span>
+                    </div>
+                    <div className="admin-user-actions" />
+                  </div>
+                  {users.map(u => (
                     <div key={u.id} className="admin-row">
                       <div className="admin-user-info">
-                        <strong>{u.name}</strong>
+                        <div className="admin-user-name">
+                          <strong>{u.name}</strong>
+                          {u.isAdmin && <span className="admin-badge">Admin</span>}
+                        </div>
                         <span>{u.email}</span>
-                        <span className="admin-date">{new Date(u.createdAt).toLocaleDateString('fr-FR')}</span>
+                        <span className="admin-date">Inscrit le {new Date(u.createdAt).toLocaleDateString('fr-FR')}</span>
+                      </div>
+                      <div className="admin-stats">
+                        <span className="stat-item">{u.stats.publications}</span>
+                        <span className="stat-item">{u.stats.reviews}</span>
+                        <span className="stat-item">{u.stats.votesUp}</span>
+                        <span className="stat-item">{u.stats.votesDown}</span>
                       </div>
                       <div className="admin-user-actions">
-                        <button className="btn-ghost danger" onClick={() => deleteUser(u.id)}>Supprimer</button>
+                        {!u.isAdmin && (
+                          <button className="btn-ghost danger" onClick={() => deleteUser(u.id)}>Supprimer</button>
+                        )}
                       </div>
                     </div>
                   ))}

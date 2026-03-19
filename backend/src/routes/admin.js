@@ -5,13 +5,26 @@ import { requireAdmin } from '../middleware/auth.js'
 const router = Router()
 const prisma = new PrismaClient()
 
-// GET all users (admin)
+// GET all users with activity stats (admin)
 router.get('/users', requireAdmin, async (req, res) => {
   const users = await prisma.user.findMany({
-    select: { id: true, email: true, name: true, isApproved: true, isAdmin: true, createdAt: true },
-    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true, email: true, name: true, isApproved: true, isAdmin: true, createdAt: true,
+      _count: { select: { contents: true, reviews: true } },
+      votes: { select: { type: true } },
+    },
   })
-  res.json(users)
+
+  const result = users.map(u => {
+    const votesUp = u.votes.filter(v => v.type === 'UP').length
+    const votesDown = u.votes.filter(v => v.type === 'DOWN').length
+    const total = u._count.contents + u._count.reviews + u.votes.length
+    const { votes, _count, ...base } = u
+    return { ...base, stats: { publications: u._count.contents, reviews: u._count.reviews, votesUp, votesDown, total } }
+  })
+
+  result.sort((a, b) => b.stats.total - a.stats.total)
+  res.json(result)
 })
 
 // PATCH approve user
