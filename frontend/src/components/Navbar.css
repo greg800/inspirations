@@ -52,6 +52,6 @@
 
 @media (max-width: 768px) {
   .navbar-cta-mobile-hidden {
-    display: none;
+    display: none !important;
   }
 }
