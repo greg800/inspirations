@@ -1,0 +1,73 @@
+.ios-banner {
+  position: fixed;
+  bottom: 90px; /* au-dessus du sticky bar */
+  left: 16px;
+  right: 16px;
+  z-index: 200;
+  animation: ios-banner-in 0.3s ease;
+}
+
+@keyframes ios-banner-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.ios-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1c1c1e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.ios-banner-icon {
+  flex-shrink: 0;
+  color: #fff;
+  opacity: 0.85;
+}
+
+.ios-banner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ios-banner-text strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.ios-banner-text span {
+  font-size: 12px;
+  opacity: 0.75;
+  line-height: 1.4;
+}
+.ios-banner-text b {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.ios-banner-close {
+  background: none;
+  border: none;
+  color: #fff;
+  opacity: 0.5;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.ios-banner-close:hover { opacity: 1; }
+
+/* Petite flèche pointant vers la barre Safari en bas */
+.ios-banner-arrow {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #1c1c1e;
+  margin: 0 auto;
+}

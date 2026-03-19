@@ -3,6 +3,7 @@ import { AuthProvider } from './lib/auth.jsx'
 import { GalleryFilterProvider } from './lib/galleryFilter.jsx'
 import Navbar from './components/Navbar.jsx'
 import MobileBottomBar from './components/MobileBottomBar.jsx'
+import IOSInstallBanner from './components/IOSInstallBanner.jsx'
 import Gallery from './pages/Gallery.jsx'
 import Detail from './pages/Detail.jsx'
 import ContentForm from './pages/ContentForm.jsx'
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/admin" element={<Admin />} />
         </Routes>
         <MobileBottomBar />
+        <IOSInstallBanner />
       </GalleryFilterProvider>
     </AuthProvider>
   )
