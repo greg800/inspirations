@@ -9,21 +9,26 @@ function zoomToMinWidth(zoom) {
   return Math.round(60 + (zoom - 10) * (220 - 60) / 90)
 }
 
-function getInitialZoom(user) {
-  if (user?.zoomLevel) return user.zoomLevel
-  const saved = parseInt(localStorage.getItem('zoom'))
-  return isNaN(saved) ? 75 : saved
-}
-
 export default function Gallery() {
   const { user, updateUser } = useAuth()
   const [contents, setContents] = useState([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({ support: '', genre: '', minRating: '' })
-  const [zoom, setZoom] = useState(() => getInitialZoom(JSON.parse(localStorage.getItem('user'))))
+  const [zoom, setZoom] = useState(() => {
+    const saved = parseInt(localStorage.getItem('zoom'))
+    return isNaN(saved) ? 75 : saved
+  })
   const [supports, setSupports] = useState([])
   const [genres, setGenres] = useState([])
   const saveZoomTimer = useRef(null)
+
+  // Si l'utilisateur a un zoomLevel côté serveur, il prend priorité
+  useEffect(() => {
+    if (user?.zoomLevel != null) {
+      setZoom(user.zoomLevel)
+      localStorage.setItem('zoom', user.zoomLevel)
+    }
+  }, [user?.zoomLevel])
 
   useEffect(() => {
     api.tags.list('support').then(ts => setSupports(ts.map(t => t.value)))
@@ -92,14 +97,13 @@ export default function Gallery() {
             onChange={e => {
               const val = Number(e.target.value)
               setZoom(val)
+              localStorage.setItem('zoom', val)
               clearTimeout(saveZoomTimer.current)
-              saveZoomTimer.current = setTimeout(() => {
-                if (user) {
+              if (user) {
+                saveZoomTimer.current = setTimeout(() => {
                   api.users.updatePreferences({ zoomLevel: val }).then(() => updateUser({ zoomLevel: val })).catch(() => {})
-                } else {
-                  localStorage.setItem('zoom', val)
-                }
-              }, 600)
+                }, 600)
+              }
             }}
             className="zoom-slider"
             aria-label="Taille des aperçus"
