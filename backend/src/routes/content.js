@@ -2,13 +2,17 @@ import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
 import multer from 'multer'
 import path from 'path'
+import { mkdirSync } from 'fs'
 import { requireApproved, requireAuth, optionalAuth } from '../middleware/auth.js'
 
 const router = Router()
 const prisma = new PrismaClient()
 
+const UPLOADS_DIR = process.env.UPLOADS_PATH || 'uploads/'
+mkdirSync(UPLOADS_DIR, { recursive: true })
+
 const storage = multer.diskStorage({
-  destination: 'uploads/',
+  destination: UPLOADS_DIR,
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname.replace(/\s/g, '_')}`)
   },

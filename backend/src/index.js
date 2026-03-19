@@ -21,7 +21,7 @@ if (!isProd) {
   app.use(cors({ origin: 'http://localhost:5173' }))
 }
 app.use(express.json())
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
+app.use('/uploads', express.static(process.env.UPLOADS_PATH || path.join(__dirname, '../uploads')))
 
 app.use('/api/auth', authRoutes)
 app.use('/api/content', contentRoutes)
