@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './lib/auth.jsx'
 import Navbar from './components/Navbar.jsx'
+import MobileBottomBar from './components/MobileBottomBar.jsx'
 import Gallery from './pages/Gallery.jsx'
 import Detail from './pages/Detail.jsx'
 import ContentForm from './pages/ContentForm.jsx'
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/admin" element={<Admin />} />
       </Routes>
+      <MobileBottomBar />
     </AuthProvider>
   )
 }
