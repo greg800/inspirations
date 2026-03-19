@@ -12,7 +12,7 @@ model User {
   email      String    @unique
   password   String
   name       String
-  isApproved Boolean   @default(false)
+  isApproved Boolean   @default(true)
   isAdmin    Boolean   @default(false)
   zoomLevel  Int       @default(75)
   createdAt  DateTime  @default(now())

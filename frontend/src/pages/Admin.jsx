@@ -33,24 +33,13 @@ export default function Admin() {
     setTags(ts => ts.filter(t => t.id !== id))
   }
 
-  async function approve(id) {
-    const updated = await api.admin.approve(id)
-    setUsers(us => us.map(u => u.id === id ? { ...u, ...updated } : u))
-  }
-
-  async function revoke(id) {
-    const updated = await api.admin.revoke(id)
-    setUsers(us => us.map(u => u.id === id ? { ...u, ...updated } : u))
-  }
-
   async function deleteUser(id) {
     if (!confirm('Supprimer cet utilisateur et tout son contenu ?')) return
     await api.admin.deleteUser(id)
     setUsers(us => us.filter(u => u.id !== id))
   }
 
-  const pending = users.filter(u => !u.isApproved && !u.isAdmin)
-  const approved = users.filter(u => u.isApproved && !u.isAdmin)
+  const members = users.filter(u => !u.isAdmin)
 
   return (
     <div className="admin-page">
@@ -62,12 +51,12 @@ export default function Admin() {
         ) : (
           <>
             <section className="admin-section">
-              <h2>En attente de validation {pending.length > 0 && <span className="badge accent">{pending.length}</span>}</h2>
-              {pending.length === 0 ? (
-                <p className="admin-empty">Aucun compte en attente.</p>
+              <h2>Comptes membres</h2>
+              {members.length === 0 ? (
+                <p className="admin-empty">Aucun membre.</p>
               ) : (
                 <div className="admin-table">
-                  {pending.map(u => (
+                  {members.map(u => (
                     <div key={u.id} className="admin-row">
                       <div className="admin-user-info">
                         <strong>{u.name}</strong>
@@ -75,29 +64,6 @@ export default function Admin() {
                         <span className="admin-date">{new Date(u.createdAt).toLocaleDateString('fr-FR')}</span>
                       </div>
                       <div className="admin-user-actions">
-                        <button className="btn" onClick={() => approve(u.id)}>Valider</button>
-                        <button className="btn-ghost" onClick={() => deleteUser(u.id)}>Refuser</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-
-            <section className="admin-section">
-              <h2>Comptes actifs</h2>
-              {approved.length === 0 ? (
-                <p className="admin-empty">Aucun compte actif.</p>
-              ) : (
-                <div className="admin-table">
-                  {approved.map(u => (
-                    <div key={u.id} className="admin-row">
-                      <div className="admin-user-info">
-                        <strong>{u.name}</strong>
-                        <span>{u.email}</span>
-                      </div>
-                      <div className="admin-user-actions">
-                        <button className="btn-ghost" onClick={() => revoke(u.id)}>Révoquer</button>
                         <button className="btn-ghost danger" onClick={() => deleteUser(u.id)}>Supprimer</button>
                       </div>
                     </div>

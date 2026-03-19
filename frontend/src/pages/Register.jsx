@@ -27,9 +27,9 @@ export default function Register() {
     return (
       <div className="auth-page">
         <div className="auth-box">
-          <h1>Demande envoyée</h1>
+          <h1>Compte créé !</h1>
           <p className="msg-success">
-            Votre compte est créé. L'administrateur va valider votre accès sous peu.
+            Votre compte est prêt. Vous pouvez vous connecter dès maintenant.
           </p>
           <Link to="/login" className="btn" style={{ marginTop: 24, display: 'inline-flex' }}>
             Se connecter

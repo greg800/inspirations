@@ -15,8 +15,8 @@ router.post('/register', async (req, res) => {
   if (existing) return res.status(400).json({ error: 'Email déjà utilisé' })
 
   const hash = await bcrypt.hash(password, 10)
-  await prisma.user.create({ data: { email, password: hash, name } })
-  res.json({ message: 'Compte créé. En attente de validation par l\'administrateur.' })
+  await prisma.user.create({ data: { email, password: hash, name, isApproved: true } })
+  res.json({ message: 'Compte créé.' })
 })
 
 router.post('/login', async (req, res) => {
