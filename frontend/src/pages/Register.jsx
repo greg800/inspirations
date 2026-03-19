@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
+import { useAuth } from '../lib/auth.jsx'
 import './Auth.css'
 
 export default function Register() {
+  const { login } = useAuth()
+  const navigate = useNavigate()
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e) {
@@ -14,29 +16,14 @@ export default function Register() {
     setError('')
     setLoading(true)
     try {
-      await api.auth.register(form)
-      setSuccess(true)
+      const { token, user } = await api.auth.register(form)
+      login(token, user)
+      navigate('/')
     } catch (e) {
       setError(e.message)
     } finally {
       setLoading(false)
     }
-  }
-
-  if (success) {
-    return (
-      <div className="auth-page">
-        <div className="auth-box">
-          <h1>Compte créé !</h1>
-          <p className="msg-success">
-            Votre compte est prêt. Vous pouvez vous connecter dès maintenant.
-          </p>
-          <Link to="/login" className="btn" style={{ marginTop: 24, display: 'inline-flex' }}>
-            Se connecter
-          </Link>
-        </div>
-      </div>
-    )
   }
 
   return (
