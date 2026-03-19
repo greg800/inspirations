@@ -115,13 +115,21 @@
   color: var(--color-text);
 }
 
-.admin-user-actions {
-  display: flex;
-  gap: 10px;
-  flex-shrink: 0;
-  min-width: 90px;
-  justify-content: flex-end;
+.admin-delete-btn {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: none;
+  color: #C62828;
+  border: 1px solid #FFCDD2;
+  padding: 2px 7px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.4;
 }
+.admin-delete-btn:hover { border-color: #C62828; }
 
 .btn-ghost.danger {
   color: #C62828;

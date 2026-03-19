@@ -62,7 +62,6 @@ export default function Admin() {
                       <span title="Pouces vers le haut">👍</span>
                       <span title="Pouces vers le bas">👎</span>
                     </div>
-                    <div className="admin-user-actions" />
                   </div>
                   {users.map(u => (
                     <div key={u.id} className="admin-row">
@@ -70,6 +69,9 @@ export default function Admin() {
                         <div className="admin-user-name">
                           <strong>{u.name}</strong>
                           {u.isAdmin && <span className="admin-badge">Admin</span>}
+                          {!u.isAdmin && (
+                            <button className="admin-delete-btn" onClick={() => deleteUser(u.id)}>Supprimer</button>
+                          )}
                         </div>
                         <span>{u.email}</span>
                         <span className="admin-date">Inscrit le {new Date(u.createdAt).toLocaleDateString('fr-FR')}</span>
@@ -79,11 +81,6 @@ export default function Admin() {
                         <span className="stat-item">{u.stats.reviews}</span>
                         <span className="stat-item">{u.stats.votesUp}</span>
                         <span className="stat-item">{u.stats.votesDown}</span>
-                      </div>
-                      <div className="admin-user-actions">
-                        {!u.isAdmin && (
-                          <button className="btn-ghost danger" onClick={() => deleteUser(u.id)}>Supprimer</button>
-                        )}
                       </div>
                     </div>
                   ))}
