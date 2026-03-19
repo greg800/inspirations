@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
 import { useAuth } from '../lib/auth.jsx'
+import { useGalleryFilter } from '../lib/galleryFilter.jsx'
 import ContentCard from '../components/ContentCard.jsx'
 import './Gallery.css'
 
@@ -11,6 +12,7 @@ function zoomToMinWidth(zoom) {
 
 export default function Gallery() {
   const { user, updateUser } = useAuth()
+  const { filtersVisible, setHasActiveFilters } = useGalleryFilter()
   const [contents, setContents] = useState([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({ support: '', genre: '', minRating: '' })
@@ -36,6 +38,8 @@ export default function Gallery() {
   }, [])
 
   useEffect(() => {
+    setHasActiveFilters(!!(filters.support || filters.genre || filters.minRating))
+
     const params = {}
     if (filters.support) params.support = filters.support
     if (filters.genre) params.genre = filters.genre
@@ -65,7 +69,7 @@ export default function Gallery() {
           <p className="gallery-subtitle">Les livres, podcasts et articles qui changent une vie.</p>
         </header>
 
-        <div className="filters">
+        <div className={`filters${filtersVisible ? ' filters--visible' : ''}`}>
           <select value={filters.support} onChange={e => setFilter('support', e.target.value)}>
             <option value="">Tous les supports</option>
             {supports.map(s => <option key={s} value={s}>{s}</option>)}

@@ -5,6 +5,8 @@
 @media (max-width: 768px) {
   .mobile-bottom-bar {
     display: flex;
+    align-items: center;
+    gap: 10px;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -14,6 +16,51 @@
     background: var(--color-bg);
     border-top: 1px solid var(--color-border);
     z-index: 90;
+  }
+
+  /* Bouton entonnoir — 1/4 de la largeur */
+  .mobile-funnel-btn {
+    position: relative;
+    flex: 0 0 calc(25% - 5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    background: var(--color-cta);
+    color: var(--color-cta-text);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+
+  /* État actif : négatif (entonnoir marron sur fond blanc) */
+  .mobile-funnel-btn.active {
+    background: var(--color-bg);
+    color: var(--color-cta);
+    border: 1.5px solid var(--color-border);
+  }
+
+  .mobile-funnel-btn:active {
+    opacity: 0.8;
+  }
+
+  /* Point indicateur filtre actif */
+  .mobile-funnel-dot {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    border: 1.5px solid var(--color-bg);
+  }
+
+  /* Zone CTA — pleine largeur sans entonnoir, 3/4 avec entonnoir */
+  .mobile-bottom-cta {
+    flex: 1;
   }
 
   .mobile-bottom-btn {

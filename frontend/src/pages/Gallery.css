@@ -83,6 +83,16 @@
   outline-offset: 2px;
 }
 
+@media (max-width: 768px) {
+  .filters {
+    display: none;
+    margin-bottom: 20px;
+  }
+  .filters.filters--visible {
+    display: flex;
+  }
+}
+
 @media (max-width: 480px) {
   .zoom-slider { width: 120px; }
 }
