@@ -136,13 +136,21 @@ router.put('/:id', requireApproved, upload.single('coverImage'), async (req, res
 
 // DELETE (own or admin)
 router.delete('/:id', requireAuth, async (req, res) => {
-  const content = await prisma.content.findUnique({ where: { id: parseInt(req.params.id) } })
-  if (!content) return res.status(404).json({ error: 'Non trouvé' })
-  if (content.userId !== req.user.id && !req.user.isAdmin) {
-    return res.status(403).json({ error: 'Non autorisé' })
+  try {
+    const id = parseInt(req.params.id)
+    const content = await prisma.content.findUnique({ where: { id } })
+    if (!content) return res.status(404).json({ error: 'Non trouvé' })
+    if (content.userId !== req.user.id && !req.user.isAdmin) {
+      return res.status(403).json({ error: 'Non autorisé' })
+    }
+    await prisma.vote.deleteMany({ where: { contentId: id } })
+    await prisma.review.deleteMany({ where: { contentId: id } })
+    await prisma.content.delete({ where: { id } })
+    res.json({ message: 'Supprimé' })
+  } catch (err) {
+    console.error('DELETE content error:', err)
+    res.status(500).json({ error: 'Erreur serveur' })
   }
-  await prisma.content.delete({ where: { id: parseInt(req.params.id) } })
-  res.json({ message: 'Supprimé' })
 })
 
 export default router

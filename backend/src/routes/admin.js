@@ -36,9 +36,20 @@ router.patch('/users/:id/revoke', requireAdmin, async (req, res) => {
 
 // DELETE user (and their content)
 router.delete('/users/:id', requireAdmin, async (req, res) => {
-  await prisma.content.deleteMany({ where: { userId: parseInt(req.params.id) } })
-  await prisma.user.delete({ where: { id: parseInt(req.params.id) } })
+  const userId = parseInt(req.params.id)
+  await prisma.vote.deleteMany({ where: { content: { userId } } })
+  await prisma.review.deleteMany({ where: { content: { userId } } })
+  await prisma.content.deleteMany({ where: { userId } })
+  await prisma.user.delete({ where: { id: userId } })
   res.json({ message: 'Utilisateur supprimé' })
+})
+
+// DELETE all content (admin purge — used for migrations)
+router.delete('/content/purge-all', requireAdmin, async (req, res) => {
+  await prisma.vote.deleteMany()
+  await prisma.review.deleteMany()
+  await prisma.content.deleteMany()
+  res.json({ message: 'Tout le contenu supprimé' })
 })
 
 export default router

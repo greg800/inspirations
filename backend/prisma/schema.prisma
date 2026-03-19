@@ -57,7 +57,7 @@ model Review {
   userId    Int
   contentId Int
   user      User     @relation(fields: [userId], references: [id])
-  content   Content  @relation(fields: [contentId], references: [id])
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
   @@unique([userId, contentId])
@@ -69,7 +69,7 @@ model Vote {
   userId    Int
   contentId Int
   user      User     @relation(fields: [userId], references: [id])
-  content   Content  @relation(fields: [contentId], references: [id])
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
   @@unique([userId, contentId])
