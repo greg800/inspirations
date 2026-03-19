@@ -49,3 +49,9 @@
   font-size: 13px;
   color: var(--color-text-secondary);
 }
+
+@media (max-width: 768px) {
+  .navbar-cta-mobile-hidden {
+    display: none;
+  }
+}

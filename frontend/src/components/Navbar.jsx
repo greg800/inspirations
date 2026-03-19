@@ -22,7 +22,7 @@ export default function Navbar() {
           {user ? (
             <>
               {(user.isApproved || user.isAdmin) && (
-                <Link to="/create" className="btn">Partager</Link>
+                <Link to="/create" className="btn navbar-cta-mobile-hidden">Partager</Link>
               )}
               {user.isAdmin && (
                 <Link to="/admin" className="navbar-link">Admin</Link>
@@ -33,7 +33,7 @@ export default function Navbar() {
           ) : (
             <>
               <Link to="/login" className="navbar-link">Se connecter</Link>
-              <Link to="/register" className="btn">Créer un compte</Link>
+              <Link to="/register" className="btn navbar-cta-mobile-hidden">Créer un compte</Link>
             </>
           )}
         </div>
