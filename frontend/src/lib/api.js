@@ -60,5 +60,8 @@ export const api = {
     get: (contentId) => request(`/content/${contentId}/votes`),
     cast: (contentId, type) => request(`/content/${contentId}/votes`, { method: 'POST', body: JSON.stringify({ type }) }),
   },
+  users: {
+    updatePreferences: (data) => request('/users/me', { method: 'PATCH', body: JSON.stringify(data) }),
+  },
   linkPreview: (url) => request(`/link-preview?url=${encodeURIComponent(url)}`),
 }

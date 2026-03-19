@@ -33,7 +33,7 @@ router.post('/login', async (req, res) => {
     SECRET,
     { expiresIn: '7d' }
   )
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin, isApproved: user.isApproved } })
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin, isApproved: user.isApproved, zoomLevel: user.zoomLevel } })
 })
 
 export default router

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
+import { useAuth } from '../lib/auth.jsx'
 import ContentCard from '../components/ContentCard.jsx'
 import './Gallery.css'
 
@@ -8,13 +9,21 @@ function zoomToMinWidth(zoom) {
   return Math.round(60 + (zoom - 10) * (220 - 60) / 90)
 }
 
+function getInitialZoom(user) {
+  if (user?.zoomLevel) return user.zoomLevel
+  const saved = parseInt(localStorage.getItem('zoom'))
+  return isNaN(saved) ? 75 : saved
+}
+
 export default function Gallery() {
+  const { user, updateUser } = useAuth()
   const [contents, setContents] = useState([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({ support: '', genre: '', minRating: '' })
-  const [zoom, setZoom] = useState(100)
+  const [zoom, setZoom] = useState(() => getInitialZoom(JSON.parse(localStorage.getItem('user'))))
   const [supports, setSupports] = useState([])
   const [genres, setGenres] = useState([])
+  const saveZoomTimer = useRef(null)
 
   useEffect(() => {
     api.tags.list('support').then(ts => setSupports(ts.map(t => t.value)))
@@ -80,7 +89,18 @@ export default function Gallery() {
             min="10"
             max="100"
             value={zoom}
-            onChange={e => setZoom(Number(e.target.value))}
+            onChange={e => {
+              const val = Number(e.target.value)
+              setZoom(val)
+              clearTimeout(saveZoomTimer.current)
+              saveZoomTimer.current = setTimeout(() => {
+                if (user) {
+                  api.users.updatePreferences({ zoomLevel: val }).then(() => updateUser({ zoomLevel: val })).catch(() => {})
+                } else {
+                  localStorage.setItem('zoom', val)
+                }
+              }, 600)
+            }}
             className="zoom-slider"
             aria-label="Taille des aperçus"
           />
