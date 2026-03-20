@@ -30,9 +30,22 @@ function wordCount(text) {
   return text.trim().split(/\s+/).filter(Boolean).length
 }
 
+// GET all unique contributor names (publishers + reviewers)
+router.get('/contributors', async (req, res) => {
+  const [publishers, reviewers] = await Promise.all([
+    prisma.content.findMany({ select: { user: { select: { name: true } } }, distinct: ['userId'] }),
+    prisma.review.findMany({ select: { user: { select: { name: true } } }, distinct: ['userId'] }),
+  ])
+  const names = [...new Set([
+    ...publishers.map(c => c.user.name),
+    ...reviewers.map(r => r.user.name),
+  ])].sort()
+  res.json(names)
+})
+
 // GET all contents (public) with optional filters
 router.get('/', optionalAuth, async (req, res) => {
-  const { support, genre, minRating, maxRating } = req.query
+  const { support, genre, minRating, maxRating, contributor } = req.query
   const where = {}
   if (support) where.support = support
   if (genre) where.genre = genre
@@ -40,6 +53,12 @@ router.get('/', optionalAuth, async (req, res) => {
     where.rating = {}
     if (minRating) where.rating.gte = parseFloat(minRating)
     if (maxRating) where.rating.lte = parseFloat(maxRating)
+  }
+  if (contributor) {
+    where.OR = [
+      { user: { name: contributor } },
+      { reviews: { some: { user: { name: contributor } } } },
+    ]
   }
   const contents = await prisma.content.findMany({
     where,

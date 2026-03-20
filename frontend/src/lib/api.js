@@ -51,6 +51,9 @@ export const api = {
     revoke: (id) => request(`/admin/users/${id}/revoke`, { method: 'PATCH' }),
     deleteUser: (id) => request(`/admin/users/${id}`, { method: 'DELETE' }),
   },
+  contributors: {
+    list: () => request('/content/contributors'),
+  },
   tags: {
     list: (type) => request(`/tags${type ? `?type=${type}` : ''}`),
     create: (data) => request('/tags', { method: 'POST', body: JSON.stringify(data) }),

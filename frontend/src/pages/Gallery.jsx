@@ -15,13 +15,14 @@ export default function Gallery() {
   const { filtersVisible, setHasActiveFilters } = useGalleryFilter()
   const [contents, setContents] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState({ support: '', genre: '', minRating: '' })
+  const [filters, setFilters] = useState({ support: '', genre: '', minRating: '', contributor: '' })
   const [zoom, setZoom] = useState(() => {
     const saved = parseInt(localStorage.getItem('zoom'))
     return isNaN(saved) ? 75 : saved
   })
   const [supports, setSupports] = useState([])
   const [genres, setGenres] = useState([])
+  const [contributors, setContributors] = useState([])
   const saveZoomTimer = useRef(null)
 
   // Si l'utilisateur a un zoomLevel côté serveur, il prend priorité
@@ -35,15 +36,17 @@ export default function Gallery() {
   useEffect(() => {
     api.tags.list('support').then(ts => setSupports(ts.map(t => t.value)))
     api.tags.list('genre').then(ts => setGenres(ts.map(t => t.value)))
+    api.contributors.list().then(setContributors)
   }, [])
 
   useEffect(() => {
-    setHasActiveFilters(!!(filters.support || filters.genre || filters.minRating))
+    setHasActiveFilters(!!(filters.support || filters.genre || filters.minRating || filters.contributor))
 
     const params = {}
     if (filters.support) params.support = filters.support
     if (filters.genre) params.genre = filters.genre
     if (filters.minRating) params.minRating = filters.minRating
+    if (filters.contributor) params.contributor = filters.contributor
 
     setLoading(true)
     api.content.list(params)
@@ -84,8 +87,12 @@ export default function Gallery() {
             <option value="17">17+ / 20</option>
             <option value="19">19+ / 20</option>
           </select>
-          {(filters.support || filters.genre || filters.minRating) && (
-            <button className="btn-ghost" onClick={() => setFilters({ support: '', genre: '', minRating: '' })}>
+          <select value={filters.contributor} onChange={e => setFilter('contributor', e.target.value)}>
+            <option value="">Tous les contributeurs</option>
+            {contributors.map(name => <option key={name} value={name}>{name}</option>)}
+          </select>
+          {(filters.support || filters.genre || filters.minRating || filters.contributor) && (
+            <button className="btn-ghost" onClick={() => setFilters({ support: '', genre: '', minRating: '', contributor: '' })}>
               Réinitialiser
             </button>
           )}
