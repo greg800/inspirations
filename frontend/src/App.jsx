@@ -4,6 +4,7 @@ import { GalleryFilterProvider } from './lib/galleryFilter.jsx'
 import Navbar from './components/Navbar.jsx'
 import MobileBottomBar from './components/MobileBottomBar.jsx'
 import IOSInstallBanner from './components/IOSInstallBanner.jsx'
+import PWAUpdatePrompt from './components/PWAUpdatePrompt.jsx'
 import Gallery from './pages/Gallery.jsx'
 import Detail from './pages/Detail.jsx'
 import ContentForm from './pages/ContentForm.jsx'
@@ -27,6 +28,7 @@ export default function App() {
         </Routes>
         <MobileBottomBar />
         <IOSInstallBanner />
+        <PWAUpdatePrompt />
       </GalleryFilterProvider>
     </AuthProvider>
   )

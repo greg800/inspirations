@@ -1,0 +1,39 @@
+.pwa-update-banner {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1c1c1e;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  font-size: 14px;
+  white-space: nowrap;
+  animation: pwa-slide-up 0.3s ease;
+}
+
+@keyframes pwa-slide-up {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.pwa-update-banner button {
+  background: var(--color-cta);
+  color: var(--color-cta-text);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pwa-update-banner button:hover {
+  opacity: 0.9;
+}
