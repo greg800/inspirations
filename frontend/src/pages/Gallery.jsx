@@ -12,10 +12,9 @@ function zoomToMinWidth(zoom) {
 
 export default function Gallery() {
   const { user, updateUser } = useAuth()
-  const { filtersVisible, setHasActiveFilters } = useGalleryFilter()
+  const { filtersVisible, setHasActiveFilters, filters, setFilter, resetFilters } = useGalleryFilter()
   const [contents, setContents] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState({ support: '', genre: '', minRating: '', contributor: '' })
   const [zoom, setZoom] = useState(() => {
     const saved = parseInt(localStorage.getItem('zoom'))
     return isNaN(saved) ? 75 : saved
@@ -54,10 +53,6 @@ export default function Gallery() {
       .finally(() => setLoading(false))
   }, [filters])
 
-  function setFilter(key, value) {
-    setFilters(f => ({ ...f, [key]: value }))
-  }
-
   const minWidth = zoomToMinWidth(zoom)
   const gridStyle = {
     gridTemplateColumns: `repeat(auto-fill, minmax(${minWidth}px, 1fr))`,
@@ -92,7 +87,7 @@ export default function Gallery() {
             {contributors.map(name => <option key={name} value={name}>{name}</option>)}
           </select>
           {(filters.support || filters.genre || filters.minRating || filters.contributor) && (
-            <button className="btn-ghost" onClick={() => setFilters({ support: '', genre: '', minRating: '', contributor: '' })}>
+            <button className="btn-ghost" onClick={resetFilters}>
               Réinitialiser
             </button>
           )}
