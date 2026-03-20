@@ -11,6 +11,7 @@ import ContentForm from './pages/ContentForm.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import Admin from './pages/Admin.jsx'
+import Activity from './pages/Activity.jsx'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/activity" element={<Activity />} />
         </Routes>
         <MobileBottomBar />
         <IOSInstallBanner />

@@ -10,6 +10,7 @@ import tagsRouter from './routes/tags.js'
 import linkPreviewRouter from './routes/link-preview.js'
 import votesRouter from './routes/votes.js'
 import usersRouter from './routes/users.js'
+import activityRouter from './routes/activity.js'
 
 const app = express()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -31,6 +32,7 @@ app.use('/api/tags', tagsRouter)
 app.use('/api/link-preview', linkPreviewRouter)
 app.use('/api/content/:id/votes', votesRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/activity', activityRouter)
 
 // En production : servir le frontend buildé
 if (isProd) {

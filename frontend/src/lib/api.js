@@ -54,6 +54,12 @@ export const api = {
   contributors: {
     list: () => request('/content/contributors'),
   },
+  activity: {
+    get: (params = {}) => {
+      const q = new URLSearchParams(params).toString()
+      return request(`/activity${q ? '?' + q : ''}`)
+    },
+  },
   tags: {
     list: (type) => request(`/tags${type ? `?type=${type}` : ''}`),
     create: (data) => request('/tags', { method: 'POST', body: JSON.stringify(data) }),
