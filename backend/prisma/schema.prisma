@@ -14,7 +14,7 @@ model User {
   name       String
   isApproved Boolean   @default(true)
   isAdmin    Boolean   @default(false)
-  zoomLevel  Int       @default(75)
+  zoomLevel  Int       @default(50)
   createdAt  DateTime  @default(now())
   contents   Content[]
   reviews    Review[]

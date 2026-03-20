@@ -17,7 +17,7 @@ export default function Gallery() {
   const [loading, setLoading] = useState(true)
   const [zoom, setZoom] = useState(() => {
     const saved = parseInt(localStorage.getItem('zoom'))
-    return isNaN(saved) ? 75 : saved
+    return isNaN(saved) ? 50 : saved
   })
   const [supports, setSupports] = useState([])
   const [genres, setGenres] = useState([])
@@ -63,8 +63,7 @@ export default function Gallery() {
     <div className="gallery-page">
       <div className="container">
         <header className="gallery-header">
-          <h1>Inspirations</h1>
-          <p className="gallery-subtitle">Les livres, podcasts et articles qui changent une vie.</p>
+          <p className="gallery-subtitle">Les livres, podcasts, films et articles qui changent une vie.</p>
         </header>
 
         <div className={`filters${filtersVisible ? ' filters--visible' : ''}`}>
@@ -91,30 +90,29 @@ export default function Gallery() {
               Réinitialiser
             </button>
           )}
-        </div>
-
-        <div className="zoom-bar">
-          <span className="zoom-icon">⊟</span>
-          <input
-            type="range"
-            min="10"
-            max="100"
-            value={zoom}
-            onChange={e => {
-              const val = Number(e.target.value)
-              setZoom(val)
-              localStorage.setItem('zoom', val)
-              clearTimeout(saveZoomTimer.current)
-              if (user) {
-                saveZoomTimer.current = setTimeout(() => {
-                  api.users.updatePreferences({ zoomLevel: val }).then(() => updateUser({ zoomLevel: val })).catch(() => {})
-                }, 600)
-              }
-            }}
-            className="zoom-slider"
-            aria-label="Taille des aperçus"
-          />
-          <span className="zoom-icon">⊞</span>
+          <div className="zoom-bar">
+            <span className="zoom-icon">⊟</span>
+            <input
+              type="range"
+              min="10"
+              max="100"
+              value={zoom}
+              onChange={e => {
+                const val = Number(e.target.value)
+                setZoom(val)
+                localStorage.setItem('zoom', val)
+                clearTimeout(saveZoomTimer.current)
+                if (user) {
+                  saveZoomTimer.current = setTimeout(() => {
+                    api.users.updatePreferences({ zoomLevel: val }).then(() => updateUser({ zoomLevel: val })).catch(() => {})
+                  }, 600)
+                }
+              }}
+              className="zoom-slider"
+              aria-label="Taille des aperçus"
+            />
+            <span className="zoom-icon">⊞</span>
+          </div>
         </div>
 
         {loading ? (
