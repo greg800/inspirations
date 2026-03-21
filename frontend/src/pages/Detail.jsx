@@ -218,7 +218,7 @@ export default function Detail() {
 
             {/* Zone 2 — Pourquoi le lire */}
             <div className="detail-zone">
-              <div className="zone-label">Pourquoi le lire ?</div>
+              <div className="zone-label">Pourquoi en faire l'expérience ?</div>
               <CollapsibleText text={content.whyRead} />
             </div>
 

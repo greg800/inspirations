@@ -27,7 +27,7 @@ export default function Navbar() {
               {user.isAdmin && (
                 <Link to="/admin" className="navbar-link">Admin</Link>
               )}
-              <span className="navbar-name">{user.name}</span>
+              <Link to="/profile" className="navbar-name">{user.name}</Link>
               <button className="btn-ghost" onClick={handleLogout}>Déconnexion</button>
             </>
           ) : (

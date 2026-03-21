@@ -32,7 +32,7 @@ export default function Register() {
         <h1>Créer un compte</h1>
         <form onSubmit={handleSubmit}>
           <div className="field">
-            <label>Nom</label>
+            <label>Pseudo</label>
             <input value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
           </div>
