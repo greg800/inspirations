@@ -22,6 +22,7 @@ export default function MobileBottomBar() {
   const { filtersVisible, setFiltersVisible, hasActiveFilters } = useGalleryFilter()
   const isGallery = pathname === '/'
   const isActivity = pathname === '/activity'
+  const isForm = pathname === '/create' || pathname.startsWith('/edit/')
 
   function toggleFilters() {
     const next = !filtersVisible
@@ -32,6 +33,23 @@ export default function MobileBottomBar() {
   const cta = user
     ? (user.isApproved || user.isAdmin) ? <Link to="/create" className="mobile-bottom-btn">Partager</Link> : null
     : <Link to="/register" className="mobile-bottom-btn">Créer un compte</Link>
+
+  if (isForm) {
+    return (
+      <div className="mobile-bottom-bar">
+        <div className="mobile-bottom-cta">
+          <button type="submit" form="content-form" className="mobile-bottom-btn">
+            Enregistrer
+          </button>
+        </div>
+        <button type="button" className="mobile-icon-btn" onClick={() => navigate(-1)} aria-label="Annuler">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="mobile-bottom-bar">

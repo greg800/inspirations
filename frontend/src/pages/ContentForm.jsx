@@ -57,10 +57,8 @@ export default function ContentForm({ editing }) {
     e.preventDefault()
     setError('')
 
-    const wSummary = wordCount(form.summary)
     const wWhyRead = wordCount(form.whyRead)
-    if (wSummary < 100) return setError(`Résumé trop court : ${wSummary} mots (minimum 100)`)
-    if (wWhyRead < 30) return setError(`"Pourquoi le lire" trop court : ${wWhyRead} mots (minimum 30)`)
+    if (wWhyRead < 30) return setError(`"Pourquoi en faire l'expérience" trop court : ${wWhyRead} mots (minimum 30)`)
     if (!editing && !coverFile) return setError('Image de couverture requise')
 
     const fd = new FormData()
@@ -82,7 +80,6 @@ export default function ContentForm({ editing }) {
     }
   }
 
-  const wSummary = wordCount(form.summary)
   const wWhyRead = wordCount(form.whyRead)
 
   return (
@@ -90,7 +87,7 @@ export default function ContentForm({ editing }) {
       <div className="container form-container">
         <h1>{editing ? 'Modifier' : 'Partager une inspiration'}</h1>
 
-        <form onSubmit={handleSubmit} className="content-form">
+        <form id="content-form" onSubmit={handleSubmit} className="content-form">
           {/* Obligatoires */}
           <div className="form-section">
             <h2>Informations principales</h2>
@@ -132,7 +129,7 @@ export default function ContentForm({ editing }) {
           <div className="form-section">
             <h2>Contenu</h2>
             <div className="field">
-              <label>Pourquoi le lire ? *</label>
+              <label>Pourquoi en faire l'expérience ? *</label>
               <textarea rows={4} value={form.whyRead}
                 onChange={e => set('whyRead', e.target.value)} required />
               <span className={`counter ${wWhyRead >= 30 ? 'ok' : wWhyRead > 0 ? 'error' : ''}`}>
@@ -143,9 +140,6 @@ export default function ContentForm({ editing }) {
               <label>Résumé *</label>
               <textarea rows={10} value={form.summary}
                 onChange={e => set('summary', e.target.value)} required />
-              <span className={`counter ${wSummary >= 100 ? 'ok' : wSummary > 0 ? 'error' : ''}`}>
-                {wSummary} / 100 mots minimum
-              </span>
             </div>
           </div>
 
@@ -182,15 +176,6 @@ export default function ContentForm({ editing }) {
           </div>
 
           {error && <p className="msg-error">{error}</p>}
-
-          <div className="form-footer">
-            <button type="submit" className="btn" disabled={loading}>
-              {loading ? 'Envoi…' : editing ? 'Enregistrer' : 'Publier'}
-            </button>
-            <button type="button" className="btn-ghost" onClick={() => navigate(-1)}>
-              Annuler
-            </button>
-          </div>
         </form>
       </div>
     </div>
