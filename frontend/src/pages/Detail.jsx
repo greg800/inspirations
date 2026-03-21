@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { useAuth } from '../lib/auth.jsx'
+import { useStickyActions } from '../lib/stickyActions.jsx'
 import './Detail.css'
 
 const MAX_H = 5 * 1.7 * 16 // 5 lignes ≈ 136px
@@ -58,6 +59,7 @@ export default function Detail() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { setActions } = useStickyActions()
   const [content, setContent] = useState(null)
   const [loading, setLoading] = useState(true)
   const [reviewsData, setReviewsData] = useState({ reviews: [], avg: null, count: 0 })
@@ -83,7 +85,6 @@ export default function Detail() {
   async function handleVote(type) {
     if (!user || voteLoading) return
     const prev = votesData.myVote
-    // Optimistic
     setVotesData(v => {
       const next = { ...v }
       if (prev === type) {
@@ -102,7 +103,6 @@ export default function Detail() {
     setVoteLoading(true)
     try {
       await api.votes.cast(id, type)
-      // Resync propre
       api.votes.get(id).then(setVotesData)
     } catch {
       api.votes.get(id).then(setVotesData)
@@ -142,6 +142,30 @@ export default function Detail() {
     setReviewsData(await api.reviews.list(id))
   }
 
+  // Sticky bar actions selon contexte
+  useEffect(() => {
+    if (!content) return
+    const canEdit = user && (user.id === content.userId || user.isAdmin)
+    const canReview = user && user.isApproved && user.id !== content.userId
+
+    if (!user) {
+      setActions([{ label: 'Créer un compte', to: '/register' }])
+    } else if (canEdit) {
+      setActions([
+        { label: 'Modifier', to: `/edit/${content.id}` },
+        { label: 'Supprimer', onClick: handleDelete, ghost: true },
+      ])
+    } else if (canReview) {
+      setActions([{
+        label: 'Publier mon avis',
+        onClick: () => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' }),
+      }])
+    } else {
+      setActions(null)
+    }
+    return () => setActions(null)
+  }, [content?.id, user?.id, user?.isAdmin])
+
   if (loading) return <div className="detail-loading container">Chargement…</div>
   if (!content) return null
 
@@ -157,7 +181,7 @@ export default function Detail() {
 
         <div className="detail-layout">
 
-          {/* Sidebar */}
+          {/* Sidebar (col 1) */}
           <div className="detail-sidebar">
             <div className="detail-cover">
               <img src={content.coverImage} alt={content.title} />
@@ -176,6 +200,7 @@ export default function Detail() {
                 <span className="link-preview-arrow">↗</span>
               </a>
             )}
+            {/* Edit actions desktop only */}
             {canEdit && (
               <div className="detail-edit-actions">
                 <Link to={`/edit/${content.id}`} className="btn" style={{ width: '100%', justifyContent: 'center' }}>Modifier</Link>
@@ -184,39 +209,38 @@ export default function Detail() {
             )}
           </div>
 
-          {/* Content */}
+          {/* Zone 1 — Identité (col 2, row 1) */}
+          <div className="detail-zone zone-identity">
+            <div className="detail-badges">
+              {content.support && <span className="badge">{content.support}</span>}
+              {content.genre && <span className="badge">{content.genre}</span>}
+              {content.publishDate && (
+                <span className="badge">{new Date(content.publishDate).getFullYear()}</span>
+              )}
+            </div>
+            <h1 className="detail-title">{content.title}</h1>
+            <p className="detail-author">{content.author}</p>
+            <div className="detail-shared">Partagé par <strong>{content.sponsor}</strong></div>
+            <div className="detail-ratings">
+              <div className="detail-rating-item">
+                <span className="detail-rating-label">Note du sponsor</span>
+                <span className="rating">{content.rating}/20</span>
+              </div>
+              {reviewsData.avg !== null && (
+                <div className="detail-rating-item">
+                  <span className="detail-rating-label">Moyenne lecteurs</span>
+                  <span className="rating">{reviewsData.avg}/20
+                    <span className="review-count"> ({reviewsData.count})</span>
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Zones 2-5 (col 2, row 2+ / full width on mobile) */}
           <div className="detail-content">
 
-            {/* Zone 1 — Identité */}
-            <div className="detail-zone zone-identity">
-              <div className="detail-badges">
-                {content.support && <span className="badge">{content.support}</span>}
-                {content.genre && <span className="badge">{content.genre}</span>}
-                {content.publishDate && (
-                  <span className="badge">{new Date(content.publishDate).getFullYear()}</span>
-                )}
-              </div>
-              <h1 className="detail-title">{content.title}</h1>
-              <p className="detail-author">{content.author}</p>
-              <div className="detail-shared">Partagé par <strong>{content.sponsor}</strong></div>
-
-              <div className="detail-ratings">
-                <div className="detail-rating-item">
-                  <span className="detail-rating-label">Note du sponsor</span>
-                  <span className="rating">{content.rating}/20</span>
-                </div>
-                {reviewsData.avg !== null && (
-                  <div className="detail-rating-item">
-                    <span className="detail-rating-label">Moyenne lecteurs</span>
-                    <span className="rating">{reviewsData.avg}/20
-                      <span className="review-count"> ({reviewsData.count})</span>
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Zone 2 — Pourquoi le lire */}
+            {/* Zone 2 — Pourquoi */}
             <div className="detail-zone">
               <div className="zone-label">Pourquoi en faire l'expérience ?</div>
               <CollapsibleText text={content.whyRead} />
@@ -231,14 +255,12 @@ export default function Detail() {
             {/* Zone 4 — Votes */}
             <div className="detail-zone">
               <div className="zone-label">Votes</div>
-
               <div className="votes-section">
                 <div className="votes-summary">
                   <button
                     className={`vote-detail-btn${votesData.myVote === 'UP' ? ' active' : ''}`}
                     onClick={() => handleVote('UP')}
                     disabled={!user || voteLoading}
-                    title={user ? '' : 'Connectez-vous pour voter'}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
@@ -249,7 +271,6 @@ export default function Detail() {
                     className={`vote-detail-btn${votesData.myVote === 'DOWN' ? ' active' : ''}`}
                     onClick={() => handleVote('DOWN')}
                     disabled={!user || voteLoading}
-                    title={user ? '' : 'Connectez-vous pour voter'}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L10.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/>
@@ -257,7 +278,6 @@ export default function Detail() {
                     <span className="votes-count">{votesData.down}</span>
                   </button>
                 </div>
-
                 {(votesData.upVoters.length > 0 || votesData.downVoters.length > 0) && (
                   <div className="votes-detail">
                     {votesData.upVoters.length > 0 && (
@@ -286,16 +306,14 @@ export default function Detail() {
             </div>
 
             {/* Zone 5 — Avis */}
-            <div className="detail-zone">
+            <div className="detail-zone" id="review-section">
               <div className="zone-label">
                 Avis des lecteurs
                 {reviewsData.count > 0 && (
                   <span className="zone-label-count">{reviewsData.count}</span>
                 )}
               </div>
-
               <CollapsibleReviews reviews={reviewsData.reviews} />
-
               {canReview && (
                 <div className="review-form-wrap">
                   <div className="zone-sublabel">

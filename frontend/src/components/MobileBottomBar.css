@@ -85,7 +85,17 @@
   border-radius: var(--radius);
   text-decoration: none;
   letter-spacing: -0.01em;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
+/* Variante ghost (ex: Supprimer) */
+.mobile-bottom-btn.ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1.5px solid var(--color-border);
+}
+.mobile-bottom-btn.ghost:active { background: var(--color-surface); }
 
 .mobile-bottom-btn:active {
   opacity: 0.85;

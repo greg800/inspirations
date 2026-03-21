@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './lib/auth.jsx'
 import { GalleryFilterProvider } from './lib/galleryFilter.jsx'
+import { StickyActionsProvider } from './lib/stickyActions.jsx'
 import Navbar from './components/Navbar.jsx'
 import MobileBottomBar from './components/MobileBottomBar.jsx'
 import IOSInstallBanner from './components/IOSInstallBanner.jsx'
@@ -18,6 +19,7 @@ export default function App() {
   return (
     <AuthProvider>
       <GalleryFilterProvider>
+      <StickyActionsProvider>
         <Navbar />
         <Routes>
           <Route path="/" element={<Gallery />} />
@@ -33,6 +35,7 @@ export default function App() {
         <MobileBottomBar />
         <IOSInstallBanner />
         <PWAUpdatePrompt />
+      </StickyActionsProvider>
       </GalleryFilterProvider>
     </AuthProvider>
   )

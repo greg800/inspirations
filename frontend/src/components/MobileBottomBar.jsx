@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { useGalleryFilter } from '../lib/galleryFilter.jsx'
+import { useStickyActions } from '../lib/stickyActions.jsx'
 import './MobileBottomBar.css'
 
 const FunnelIcon = () => (
@@ -20,6 +21,7 @@ export default function MobileBottomBar() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { filtersVisible, setFiltersVisible, hasActiveFilters } = useGalleryFilter()
+  const { actions } = useStickyActions()
   const isGallery = pathname === '/'
   const isActivity = pathname === '/activity'
   const isForm = pathname === '/create' || pathname.startsWith('/edit/')
@@ -30,10 +32,7 @@ export default function MobileBottomBar() {
     if (next) window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const cta = user
-    ? (user.isApproved || user.isAdmin) ? <Link to="/create" className="mobile-bottom-btn">Partager</Link> : null
-    : <Link to="/register" className="mobile-bottom-btn">Créer un compte</Link>
-
+  // Mode formulaire (création/édition)
   if (isForm) {
     return (
       <div className="mobile-bottom-bar form-mode">
@@ -46,6 +45,35 @@ export default function MobileBottomBar() {
       </div>
     )
   }
+
+  // Mode page détail — actions spécifiques
+  if (actions) {
+    return (
+      <div className="mobile-bottom-bar">
+        {actions.map((act, i) => (
+          <div key={i} className="mobile-bottom-cta">
+            {act.to ? (
+              <Link to={act.to} className={`mobile-bottom-btn${act.ghost ? ' ghost' : ''}`}>
+                {act.label}
+              </Link>
+            ) : (
+              <button
+                onClick={act.onClick}
+                className={`mobile-bottom-btn${act.ghost ? ' ghost' : ''}`}
+              >
+                {act.label}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Mode galerie / défaut
+  const cta = user
+    ? (user.isApproved || user.isAdmin) ? <Link to="/create" className="mobile-bottom-btn">Partager</Link> : null
+    : <Link to="/register" className="mobile-bottom-btn">Créer un compte</Link>
 
   return (
     <div className="mobile-bottom-bar">
