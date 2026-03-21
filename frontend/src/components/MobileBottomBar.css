@@ -88,5 +88,24 @@
 }
 
 .mobile-bottom-btn:active {
-  background: var(--color-cta-hover);
+  opacity: 0.85;
+}
+
+/* Mode formulaire : Enregistrer + Annuler côte à côte, centrés */
+.mobile-bottom-bar.form-mode {
+  justify-content: center;
+  gap: 12px;
+}
+
+.mobile-bottom-bar.form-mode .mobile-bottom-btn {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 140px;
+  padding: 14px 28px;
+}
+
+.mobile-bottom-bar.form-mode .form-cancel {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
 }

@@ -36,16 +36,12 @@ export default function MobileBottomBar() {
 
   if (isForm) {
     return (
-      <div className="mobile-bottom-bar">
-        <div className="mobile-bottom-cta">
-          <button type="submit" form="content-form" className="mobile-bottom-btn">
-            Enregistrer
-          </button>
-        </div>
-        <button type="button" className="mobile-icon-btn" onClick={() => navigate(-1)} aria-label="Annuler">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
+      <div className="mobile-bottom-bar form-mode">
+        <button type="submit" form="content-form" className="mobile-bottom-btn form-save">
+          Enregistrer
+        </button>
+        <button type="button" className="mobile-bottom-btn form-cancel" onClick={() => navigate(-1)}>
+          Annuler
         </button>
       </div>
     )
