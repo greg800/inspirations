@@ -137,16 +137,42 @@ export default function Detail() {
     }
   }
 
+  async function submitReviewAndGoHome() {
+    setReviewError('')
+    const ratingNum = parseFloat(reviewForm.rating)
+    if (!reviewForm.rating || isNaN(ratingNum) || ratingNum < 0 || ratingNum > 20) {
+      setReviewError('Note invalide (0 à 20)')
+      document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
+    if (!reviewForm.comment.trim()) {
+      setReviewError('Commentaire requis')
+      document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
+    setReviewLoading(true)
+    try {
+      await api.reviews.create(id, reviewForm)
+      navigate('/')
+    } catch (e) {
+      setReviewError(e.message)
+      document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
   async function handleDeleteReview() {
     await api.reviews.delete(id)
     setReviewsData(await api.reviews.list(id))
   }
 
-  // Sticky bar actions selon contexte
+  // Sticky bar actions selon contexte + état du formulaire
   useEffect(() => {
     if (!content) return
     const canEdit = user && (user.id === content.userId || user.isAdmin)
     const canReview = user && user.isApproved && user.id !== content.userId
+    const formFilled = !!(reviewForm.rating || reviewForm.comment.trim())
 
     if (!user) {
       setActions([{ label: 'Créer un compte', to: '/register' }])
@@ -157,14 +183,16 @@ export default function Detail() {
       ])
     } else if (canReview) {
       setActions([{
-        label: 'Publier mon avis',
-        onClick: () => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' }),
+        label: formFilled ? 'Enregistrer mon avis' : 'Publier mon avis',
+        onClick: formFilled
+          ? submitReviewAndGoHome
+          : () => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' }),
       }])
     } else {
       setActions(null)
     }
     return () => setActions(null)
-  }, [content?.id, user?.id, user?.isAdmin])
+  }, [content?.id, user?.id, user?.isAdmin, reviewForm.rating, reviewForm.comment])
 
   if (loading) return <div className="detail-loading container">Chargement…</div>
   if (!content) return null
@@ -351,17 +379,17 @@ export default function Detail() {
                         </div>
                       </div>
                       {reviewError && <p className="msg-error">{reviewError}</p>}
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <button type="submit" className="btn" disabled={reviewLoading}>
-                          {reviewLoading ? 'Envoi…' : myReview ? 'Mettre à jour' : 'Publier mon avis'}
-                        </button>
-                        {myReview && (
+                      {myReview && (
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          <button type="submit" className="btn" disabled={reviewLoading}>
+                            {reviewLoading ? 'Envoi…' : 'Mettre à jour'}
+                          </button>
                           <button type="button" className="btn-ghost"
                             onClick={() => setReviewForm({ rating: '', comment: '' })}>
                             Annuler
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </form>
                   )}
                 </div>
