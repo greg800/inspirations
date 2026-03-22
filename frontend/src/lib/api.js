@@ -27,6 +27,10 @@ export const api = {
       const q = new URLSearchParams(params).toString()
       return request(`/content${q ? '?' + q : ''}`)
     },
+    listPage: (params = {}) => {
+      const q = new URLSearchParams(params).toString()
+      return request(`/content${q ? '?' + q : ''}`)
+    },
     get: (id) => request(`/content/${id}`),
     create: (formData) => fetch(`${BASE}/content`, {
       method: 'POST',

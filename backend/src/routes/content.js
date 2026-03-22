@@ -43,9 +43,12 @@ router.get('/contributors', async (req, res) => {
   res.json(names)
 })
 
-// GET all contents (public) with optional filters
+// GET all contents with pagination, sorting and filters
 router.get('/', optionalAuth, async (req, res) => {
-  const { support, genre, minRating, maxRating, contributor } = req.query
+  const { support, genre, minRating, maxRating, contributor, sort = 'recent', page = 1, limit = 20 } = req.query
+  const pageNum = Math.max(1, parseInt(page) || 1)
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20))
+
   const where = {}
   if (support) where.support = support
   if (genre) where.genre = genre
@@ -60,22 +63,68 @@ router.get('/', optionalAuth, async (req, res) => {
       { reviews: { some: { user: { name: contributor } } } },
     ]
   }
+
   const contents = await prisma.content.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
     include: {
       user: { select: { name: true } },
-      votes: { select: { type: true, userId: true } },
+      votes: { select: { type: true, userId: true, createdAt: true } },
+      reviews: { select: { rating: true, createdAt: true } },
     },
   })
+
   const userId = req.user?.id || null
-  res.json(contents.map(c => ({
-    ...c,
-    upCount:   c.votes.filter(v => v.type === 'UP').length,
-    downCount: c.votes.filter(v => v.type === 'DOWN').length,
-    myVote:    userId ? (c.votes.find(v => v.userId === userId)?.type || null) : null,
-    votes: undefined,
-  })))
+
+  // Enrichir avec scores et dernière activité
+  const enriched = contents.map(c => {
+    const up   = c.votes.filter(v => v.type === 'UP').length
+    const down = c.votes.filter(v => v.type === 'DOWN').length
+
+    // Score votes → 0-20 (neutre = 10 si aucun vote)
+    const votesScore = up + down > 0 ? 10 + ((up - down) / (up + down)) * 10 : 10
+
+    // Moyenne des critiques → 0-20 (fallback = note créateur)
+    const reviewAvg = c.reviews.length > 0
+      ? c.reviews.reduce((sum, r) => sum + r.rating, 0) / c.reviews.length
+      : c.rating
+
+    // Score global = moyenne des 3 notes /20
+    const globalScore = (c.rating + reviewAvg + votesScore) / 3
+
+    // Dernière activité = max(createdAt, dernière review, dernier vote)
+    const lastActivity = Math.max(
+      new Date(c.createdAt).getTime(),
+      ...c.reviews.map(r => new Date(r.createdAt).getTime()),
+      ...c.votes.map(v => new Date(v.createdAt).getTime()),
+    )
+
+    return {
+      ...c,
+      upCount:    up,
+      downCount:  down,
+      myVote:     userId ? (c.votes.find(v => v.userId === userId)?.type || null) : null,
+      votes:      undefined,
+      reviews:    undefined,
+      _score:     globalScore,
+      _lastActivity: lastActivity,
+    }
+  })
+
+  // Tri
+  if (sort === 'score') {
+    enriched.sort((a, b) => b._score - a._score)
+  } else {
+    enriched.sort((a, b) => b._lastActivity - a._lastActivity)
+  }
+
+  // Pagination
+  const total = enriched.length
+  const start = (pageNum - 1) * limitNum
+  const items = enriched
+    .slice(start, start + limitNum)
+    .map(({ _score, _lastActivity, ...item }) => item)
+
+  res.json({ items, total, page: pageNum, hasMore: start + limitNum < total })
 })
 
 // GET single content (public)

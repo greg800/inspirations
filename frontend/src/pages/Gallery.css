@@ -27,6 +27,66 @@
   display: flex;
 }
 
+/* Sous-sections dans les filtres */
+.filters-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filters-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+  min-width: 40px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Boutons de tri */
+.sort-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.sort-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+.sort-btn.active {
+  background: var(--color-cta);
+  color: var(--color-cta-text);
+  border-color: var(--color-cta);
+}
+
+/* Séparateur entre les sous-sections */
+.filters-section + .filters-section {
+  padding-top: 12px;
+  border-top: 1px dashed var(--color-border);
+}
+
 .filters select {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -101,4 +161,13 @@
   padding: 80px 0;
   color: var(--color-text-secondary);
   font-size: 15px;
+}
+
+/* Sentinel infinite scroll */
+.gallery-loader {
+  text-align: center;
+  padding: 24px 0 8px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  min-height: 40px;
 }
