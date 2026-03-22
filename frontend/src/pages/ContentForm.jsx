@@ -58,7 +58,7 @@ export default function ContentForm({ editing }) {
     setError('')
 
     const wWhyRead = wordCount(form.whyRead)
-    if (wWhyRead < 30) return setError(`"Pourquoi en faire l'expérience" trop court : ${wWhyRead} mots (minimum 30)`)
+    if (wWhyRead < 20) return setError(`"Pourquoi en faire l'expérience" trop court : ${wWhyRead} mots (minimum 20)`)
     if (!editing && !coverFile) return setError('Image de couverture requise')
 
     const fd = new FormData()
@@ -132,8 +132,8 @@ export default function ContentForm({ editing }) {
               <label>Pourquoi en faire l'expérience ? *</label>
               <textarea rows={4} value={form.whyRead}
                 onChange={e => set('whyRead', e.target.value)} required />
-              <span className={`counter ${wWhyRead >= 30 ? 'ok' : wWhyRead > 0 ? 'error' : ''}`}>
-                {wWhyRead} / 30 mots minimum
+              <span className={`counter ${wWhyRead >= 20 ? 'ok' : wWhyRead > 0 ? 'error' : ''}`}>
+                {wWhyRead} / 20 mots minimum
               </span>
             </div>
             <div className="field">

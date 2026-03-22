@@ -155,8 +155,7 @@ router.post('/', requireApproved, upload.single('coverImage'), async (req, res) 
     return res.status(400).json({ error: 'Champs obligatoires manquants' })
   }
   if (!req.file) return res.status(400).json({ error: 'Image de couverture requise' })
-  if (wordCount(summary) < 100) return res.status(400).json({ error: `Résumé trop court (${wordCount(summary)} mots, minimum 100)` })
-  if (wordCount(whyRead) < 30) return res.status(400).json({ error: `"Pourquoi le lire" trop court (${wordCount(whyRead)} mots, minimum 30)` })
+  if (wordCount(whyRead) < 20) return res.status(400).json({ error: `"Pourquoi en faire l'expérience" trop court (${wordCount(whyRead)} mots, minimum 20)` })
 
   const ratingNum = parseFloat(rating)
   if (isNaN(ratingNum) || ratingNum < 0 || ratingNum > 20) {
@@ -192,8 +191,7 @@ router.put('/:id', requireApproved, upload.single('coverImage'), async (req, res
 
   const { title, author, summary, whyRead, rating, support, genre, publishDate, url } = req.body; const sponsor = req.user.name
 
-  if (summary && wordCount(summary) < 100) return res.status(400).json({ error: `Résumé trop court (${wordCount(summary)} mots, minimum 100)` })
-  if (whyRead && wordCount(whyRead) < 30) return res.status(400).json({ error: `"Pourquoi le lire" trop court (${wordCount(whyRead)} mots, minimum 30)` })
+  if (whyRead && wordCount(whyRead) < 20) return res.status(400).json({ error: `"Pourquoi en faire l'expérience" trop court (${wordCount(whyRead)} mots, minimum 20)` })
 
   const data = {}
   if (title) data.title = title
