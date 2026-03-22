@@ -9,6 +9,7 @@ export function GalleryFilterProvider({ children }) {
   const [hasActiveFilters, setHasActiveFilters] = useState(false)
   const [filters, setFilters] = useState(EMPTY_FILTERS)
   const [sort, setSort] = useState('recent') // 'recent' | 'score'
+  const [search, setSearch] = useState('')
 
   function setFilter(key, value) {
     setFilters(f => ({ ...f, [key]: value }))
@@ -24,6 +25,7 @@ export function GalleryFilterProvider({ children }) {
       hasActiveFilters, setHasActiveFilters,
       filters, setFilter, resetFilters,
       sort, setSort,
+      search, setSearch,
     }}>
       {children}
     </GalleryFilterContext.Provider>

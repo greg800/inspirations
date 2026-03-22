@@ -45,7 +45,7 @@ router.get('/contributors', async (req, res) => {
 
 // GET all contents with pagination, sorting and filters
 router.get('/', optionalAuth, async (req, res) => {
-  const { support, genre, minRating, maxRating, contributor, sort = 'recent', page = 1, limit = 20 } = req.query
+  const { support, genre, minRating, maxRating, contributor, search, sort = 'recent', page = 1, limit = 20 } = req.query
   const pageNum = Math.max(1, parseInt(page) || 1)
   const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20))
 
@@ -62,6 +62,16 @@ router.get('/', optionalAuth, async (req, res) => {
       { user: { name: contributor } },
       { reviews: { some: { user: { name: contributor } } } },
     ]
+  }
+  if (search && search.trim()) {
+    const s = search.trim()
+    const searchConditions = [
+      { title:  { contains: s } },
+      { author: { contains: s } },
+    ]
+    // Combiner avec OR existant si contributor est actif
+    where.AND = [{ OR: searchConditions }]
+    if (where.OR) { where.AND.push({ OR: where.OR }); delete where.OR }
   }
 
   const contents = await prisma.content.findMany({

@@ -32,7 +32,7 @@ const ArrowDown = () => (
 
 export default function Gallery() {
   const { user, updateUser } = useAuth()
-  const { filtersVisible, setHasActiveFilters, filters, setFilter, resetFilters, sort, setSort } = useGalleryFilter()
+  const { filtersVisible, setHasActiveFilters, filters, setFilter, resetFilters, sort, setSort, search, setSearch } = useGalleryFilter()
 
   const [allContents, setAllContents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -49,6 +49,7 @@ export default function Gallery() {
   const [genres, setGenres] = useState([])
   const [contributors, setContributors] = useState([])
   const saveZoomTimer = useRef(null)
+  const searchTimer = useRef(null)
   const loaderRef = useRef(null)
 
   // Sync zoom from server
@@ -65,13 +66,13 @@ export default function Gallery() {
     api.contributors.list().then(setContributors)
   }, [])
 
-  // Reset quand filtres/tri changent
+  // Reset quand filtres/tri/recherche changent
   useEffect(() => {
     setFilterVersion(v => v + 1)
     setPage(1)
     setAllContents([])
-    setHasActiveFilters(!!(filters.support || filters.genre || filters.minRating || filters.contributor))
-  }, [filters.support, filters.genre, filters.minRating, filters.contributor, sort])
+    setHasActiveFilters(!!(filters.support || filters.genre || filters.minRating || filters.contributor || search))
+  }, [filters.support, filters.genre, filters.minRating, filters.contributor, sort, search])
 
   // Charger une page
   useEffect(() => {
@@ -80,6 +81,7 @@ export default function Gallery() {
     if (filters.genre) params.genre = filters.genre
     if (filters.minRating) params.minRating = filters.minRating
     if (filters.contributor) params.contributor = filters.contributor
+    if (search) params.search = search
 
     if (page === 1) setLoading(true)
     else setLoadingMore(true)
@@ -119,6 +121,27 @@ export default function Gallery() {
         <header className="gallery-header">
           <p className="gallery-subtitle">Les livres, podcasts, films et articles qui changent une vie.</p>
         </header>
+
+        <div className="search-bar">
+          <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="search"
+            placeholder="Titre, auteur…"
+            value={search}
+            onChange={e => {
+              const val = e.target.value
+              clearTimeout(searchTimer.current)
+              searchTimer.current = setTimeout(() => setSearch(val), 300)
+            }}
+            className="search-input"
+            aria-label="Rechercher"
+          />
+          {search && (
+            <button className="search-clear" onClick={() => { setSearch(''); document.querySelector('.search-input').value = '' }} aria-label="Effacer">×</button>
+          )}
+        </div>
 
         <div className={`filters${filtersVisible ? ' filters--visible' : ''}`}>
 
