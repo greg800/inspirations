@@ -49,12 +49,25 @@ router.patch('/users/:id/revoke', requireAdmin, async (req, res) => {
 
 // DELETE user (and their content)
 router.delete('/users/:id', requireAdmin, async (req, res) => {
-  const userId = parseInt(req.params.id)
-  await prisma.vote.deleteMany({ where: { content: { userId } } })
-  await prisma.review.deleteMany({ where: { content: { userId } } })
-  await prisma.content.deleteMany({ where: { userId } })
-  await prisma.user.delete({ where: { id: userId } })
-  res.json({ message: 'Utilisateur supprimé' })
+  try {
+    const userId = parseInt(req.params.id)
+    // Votes on this user's content
+    await prisma.vote.deleteMany({ where: { content: { userId } } })
+    // Reviews on this user's content
+    await prisma.review.deleteMany({ where: { content: { userId } } })
+    // This user's own content
+    await prisma.content.deleteMany({ where: { userId } })
+    // Votes cast BY this user on others' content
+    await prisma.vote.deleteMany({ where: { userId } })
+    // Reviews written BY this user on others' content
+    await prisma.review.deleteMany({ where: { userId } })
+    // Finally delete the user
+    await prisma.user.delete({ where: { id: userId } })
+    res.json({ message: 'Utilisateur supprimé' })
+  } catch (err) {
+    console.error('DELETE user error:', err)
+    res.status(500).json({ error: err.message })
+  }
 })
 
 // DELETE all content (admin purge — used for migrations)

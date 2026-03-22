@@ -35,8 +35,12 @@ export default function Admin() {
 
   async function deleteUser(id) {
     if (!confirm('Supprimer cet utilisateur et tout son contenu ?')) return
-    await api.admin.deleteUser(id)
-    setUsers(us => us.filter(u => u.id !== id))
+    try {
+      await api.admin.deleteUser(id)
+      setUsers(us => us.filter(u => u.id !== id))
+    } catch (err) {
+      alert('Erreur lors de la suppression : ' + (err.message || 'inconnue'))
+    }
   }
 
   return (
