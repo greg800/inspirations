@@ -212,10 +212,17 @@ export default function Detail() {
           {/* Sidebar (col 1) */}
           <div className="detail-sidebar">
             <div className="detail-cover">
-              <img src={content.coverImage} alt={content.title} />
+              {content.url ? (
+                <a href={content.url} target="_blank" rel="noopener noreferrer">
+                  <img src={content.coverImage} alt={content.title} />
+                </a>
+              ) : (
+                <img src={content.coverImage} alt={content.title} />
+              )}
             </div>
+            {/* Link preview — desktop only (hidden on mobile via CSS) */}
             {content.url && (
-              <a href={content.url} target="_blank" rel="noopener noreferrer" className="link-preview">
+              <a href={content.url} target="_blank" rel="noopener noreferrer" className="link-preview link-preview-desktop">
                 {linkPreview?.image && (
                   <div className="link-preview-img">
                     <img src={linkPreview.image} alt="" />
@@ -267,6 +274,22 @@ export default function Detail() {
 
           {/* Zones 2-5 (col 2, row 2+ / full width on mobile) */}
           <div className="detail-content">
+
+            {/* Link preview — mobile only (hidden on desktop via CSS) */}
+            {content.url && (
+              <a href={content.url} target="_blank" rel="noopener noreferrer" className="link-preview link-preview-mobile">
+                {linkPreview?.image && (
+                  <div className="link-preview-img">
+                    <img src={linkPreview.image} alt="" />
+                  </div>
+                )}
+                <div className="link-preview-text">
+                  <span className="link-preview-domain">{linkPreview?.domain || new URL(content.url).hostname}</span>
+                  <span className="link-preview-title">{linkPreview?.title || content.url}</span>
+                </div>
+                <span className="link-preview-arrow">↗</span>
+              </a>
+            )}
 
             {/* Zone 2 — Pourquoi */}
             <div className="detail-zone">
