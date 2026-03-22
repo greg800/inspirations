@@ -3,7 +3,7 @@ import { useAuth } from '../lib/auth.jsx'
 import './Navbar.css'
 
 export default function Navbar() {
-  const { user, logout } = useAuth()
+  const { user, logout, unreadNotifications } = useAuth()
   const navigate = useNavigate()
 
   function handleLogout() {
@@ -27,7 +27,12 @@ export default function Navbar() {
               {user.isAdmin && (
                 <Link to="/admin" className="navbar-link">Admin</Link>
               )}
-              <Link to="/profile" className="navbar-name">{user.name}</Link>
+              <Link to="/profile" className="navbar-name">
+                {user.name}
+                {unreadNotifications > 0 && (
+                  <span className="navbar-notif-badge">{unreadNotifications > 99 ? '99+' : unreadNotifications}</span>
+                )}
+              </Link>
               <button className="btn-ghost" onClick={handleLogout}>Déconnexion</button>
             </>
           ) : (

@@ -76,5 +76,9 @@ export const api = {
   users: {
     updatePreferences: (data) => request('/users/me', { method: 'PATCH', body: JSON.stringify(data) }),
   },
+  notifications: {
+    get:      () => request('/notifications'),
+    markRead: () => request('/notifications/read', { method: 'POST' }),
+  },
   linkPreview: (url) => request(`/link-preview?url=${encodeURIComponent(url)}`),
 }
