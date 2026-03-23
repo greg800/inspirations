@@ -170,18 +170,22 @@ export default function Detail() {
   // Sticky bar actions selon contexte + état du formulaire
   useEffect(() => {
     if (!content) return
-    const canEdit = user && (user.id === content.userId || user.isAdmin)
-    const canReview = user && user.isApproved && user.id !== content.userId
+    const isAuthor = user && user.id === content.userId
+    const canEdit = user && (isAuthor || user.isAdmin)
+    // Un admin non-auteur peut laisser un avis
+    const canReview = user && user.isApproved && !isAuthor
     const formFilled = !!(reviewForm.rating || reviewForm.comment.trim())
 
     if (!user) {
       setActions([{ label: 'Créer un compte', to: '/register' }])
-    } else if (canEdit) {
+    } else if (canEdit && !formFilled) {
+      // Modifier / Supprimer tant que le formulaire d'avis est vierge
       setActions([
         { label: 'Modifier', to: `/edit/${content.id}` },
         { label: 'Supprimer', onClick: handleDelete, ghost: true },
       ])
     } else if (canReview) {
+      // Dès qu'une note ou un commentaire est saisi → "Publier mon avis"
       setActions([{
         label: formFilled ? 'Enregistrer mon avis' : 'Publier mon avis',
         onClick: formFilled
