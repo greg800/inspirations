@@ -229,7 +229,7 @@ export default function Detail() {
                   </div>
                 )}
                 <div className="link-preview-text">
-                  <span className="link-preview-domain">{linkPreview?.domain || new URL(content.url).hostname}</span>
+                  <span className="link-preview-domain">{linkPreview?.domain || (() => { try { return new URL(content.url).hostname } catch { return content.url } })()}</span>
                   <span className="link-preview-title">{linkPreview?.title || content.url}</span>
                 </div>
                 <span className="link-preview-arrow">↗</span>
@@ -284,7 +284,7 @@ export default function Detail() {
                   </div>
                 )}
                 <div className="link-preview-text">
-                  <span className="link-preview-domain">{linkPreview?.domain || new URL(content.url).hostname}</span>
+                  <span className="link-preview-domain">{linkPreview?.domain || (() => { try { return new URL(content.url).hostname } catch { return content.url } })()}</span>
                   <span className="link-preview-title">{linkPreview?.title || content.url}</span>
                 </div>
                 <span className="link-preview-arrow">↗</span>

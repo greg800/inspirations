@@ -87,8 +87,9 @@ export default function Gallery() {
     else setLoadingMore(true)
 
     api.content.listPage(params).then(result => {
-      setAllContents(prev => page === 1 ? result.items : [...prev, ...result.items])
-      setHasMore(result.hasMore)
+      const items = Array.isArray(result?.items) ? result.items : Array.isArray(result) ? result : []
+      setAllContents(prev => page === 1 ? items : [...prev, ...items])
+      setHasMore(result?.hasMore ?? false)
       setLoading(false)
       setLoadingMore(false)
     }).catch(() => {
