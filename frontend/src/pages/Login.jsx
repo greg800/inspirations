@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { useAuth } from '../lib/auth.jsx'
 import './Auth.css'
@@ -7,9 +7,11 @@ import './Auth.css'
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const successMessage = location.state?.message
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -41,11 +43,13 @@ export default function Login() {
             <input type="password" value={form.password}
               onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required />
           </div>
+          {successMessage && <p className="msg-success">{successMessage}</p>}
           {error && <p className="msg-error">{error}</p>}
           <button type="submit" className="btn full" disabled={loading}>
             {loading ? 'Connexion…' : 'Se connecter'}
           </button>
         </form>
+        <p className="auth-link"><Link to="/forgot-password">Mot de passe oublié ?</Link></p>
         <p className="auth-link">Pas encore de compte ? <Link to="/register">Créer un compte</Link></p>
       </div>
     </div>

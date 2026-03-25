@@ -11,6 +11,8 @@ import Detail from './pages/Detail.jsx'
 import ContentForm from './pages/ContentForm.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
+import ForgotPassword from './pages/ForgotPassword.jsx'
+import ResetPassword from './pages/ResetPassword.jsx'
 import Admin from './pages/Admin.jsx'
 import Activity from './pages/Activity.jsx'
 import Profile from './pages/Profile.jsx'
@@ -28,6 +30,8 @@ export default function App() {
           <Route path="/edit/:id" element={<ContentForm editing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/activity" element={<Activity />} />
           <Route path="/profile" element={<Profile />} />
