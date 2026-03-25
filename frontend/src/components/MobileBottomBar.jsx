@@ -70,6 +70,18 @@ export default function MobileBottomBar() {
     )
   }
 
+  // Mode admin / activité — retour accueil
+  const isAdminPage = pathname === '/admin'
+  if (isAdminPage || isActivity) {
+    return (
+      <div className="mobile-bottom-bar">
+        <div className="mobile-bottom-cta">
+          <Link to="/" className="mobile-bottom-btn">Retour à l'accueil</Link>
+        </div>
+      </div>
+    )
+  }
+
   // Mode galerie / défaut
   const cta = user
     ? (user.isApproved || user.isAdmin) ? <Link to="/create" className="mobile-bottom-btn">Partager</Link> : null
