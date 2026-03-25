@@ -1,25 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 407 406">
+  <!-- Fond blanc -->
+  <rect width="407" height="406" fill="white"/>
+
+  <!-- Contour bulle (path original exact) -->
+  <g transform="translate(0,406) scale(0.1,-0.1)" fill="#1a1a1a" stroke="none">
+    <path d="M1945 3474 c-881 -50 -1592 -444 -1814 -1005 -78 -199 -83 -447 -12
+-651 64 -185 212 -391 383 -534 l47 -39 -41 -297 c-23 -164 -40 -300 -37 -302
+2 -2 192 49 421 114 l418 118 52 -14 c91 -24 308 -62 432 -75 156 -15 563 -7
+706 16 634 99 1138 367 1404 748 57 81 118 201 146 289 20 62 21 84 18 305
+l-3 238 -32 80 c-208 516 -827 898 -1603 989 -131 15 -382 26 -485 20z m473
+-170 c543 -64 1051 -300 1294 -601 165 -205 228 -364 228 -578 0 -139 -23
+-235 -85 -360 -58 -117 -123 -201 -239 -313 -213 -203 -507 -354 -866 -443
+-229 -57 -335 -70 -597 -76 -305 -7 -465 9 -738 74 l-110 26 -324 -92 c-178
+-50 -326 -89 -329 -86 -4 4 36 329 54 435 4 21 -6 32 -57 70 -79 59 -224 208
+-278 289 -103 152 -151 302 -151 476 0 138 23 235 84 360 232 470 855 788
+1646 839 93 6 339 -4 468 -20z"/>
+  </g>
+
+  <!-- Étoiles dorées (outer r=35, inner r=14) -->
   <defs>
-    <g id="star">
-      <polygon points="0,-16 3.80,-5.24 15.19,-5.24 6.16,2.00 9.51,12.94 0,6.50 -9.51,12.94 -6.16,2.00 -15.19,-5.24 -3.80,-5.24" fill="#F5B800"/>
-    </g>
+    <polygon id="star" points="0,-35 8.23,-11.33 33.29,-10.82 13.31,4.33 20.58,28.32 0,14 -20.58,28.32 -13.31,4.33 -33.29,-10.82 -8.23,-11.33" fill="#F5B800"/>
   </defs>
 
-  <!-- Tail (drawn first, behind bubble) -->
-  <polygon points="55,122 82,130 26,176" fill="white"/>
+  <!-- Rangée 1 : 3 étoiles -->
+  <use href="#star" transform="translate(101, 151)"/>
+  <use href="#star" transform="translate(202, 151)"/>
+  <use href="#star" transform="translate(304, 151)"/>
 
-  <!-- Main bubble -->
-  <ellipse cx="105" cy="80" rx="83" ry="57" fill="white" stroke="#1a1a1a" stroke-width="8"/>
-
-  <!-- Tail outline (only the two exposed sides) -->
-  <polyline points="55,122 26,176 82,130" fill="none" stroke="#1a1a1a" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
-
-  <!-- Stars row 1 -->
-  <use href="#star" transform="translate(65, 74)"/>
-  <use href="#star" transform="translate(105, 74)"/>
-  <use href="#star" transform="translate(145, 74)"/>
-
-  <!-- Stars row 2 -->
-  <use href="#star" transform="translate(85, 101)"/>
-  <use href="#star" transform="translate(125, 101)"/>
+  <!-- Rangée 2 : 2 étoiles centrées -->
+  <use href="#star" transform="translate(152, 210)"/>
+  <use href="#star" transform="translate(253, 210)"/>
 </svg>
