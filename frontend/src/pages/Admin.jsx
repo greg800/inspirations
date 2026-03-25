@@ -58,15 +58,6 @@ export default function Admin() {
                 <p className="admin-empty">Aucun membre.</p>
               ) : (
                 <div className="admin-table">
-                  <div className="admin-row admin-row-header">
-                    <div className="admin-user-info" />
-                    <div className="admin-stats-header">
-                      <span title="Publications">📝</span>
-                      <span title="Avis">💬</span>
-                      <span title="Pouces vers le haut">👍</span>
-                      <span title="Pouces vers le bas">👎</span>
-                    </div>
-                  </div>
                   {users.map(u => (
                     <div key={u.id} className="admin-row">
                       <div className="admin-user-info">
@@ -80,11 +71,13 @@ export default function Admin() {
                         <span>{u.email}</span>
                         <span className="admin-date">Inscrit le {new Date(u.createdAt).toLocaleDateString('fr-FR')}</span>
                       </div>
-                      <div className="admin-stats">
-                        <span className="stat-item">{u.stats.publications}</span>
-                        <span className="stat-item">{u.stats.reviews}</span>
-                        <span className="stat-item">{u.stats.votesUp}</span>
-                        <span className="stat-item">{u.stats.votesDown}</span>
+                      <div className="admin-login-stats">
+                        <span className="admin-last-login">
+                          {u.lastLoginAt
+                            ? `Dernière connexion : ${new Date(u.lastLoginAt).toLocaleDateString('fr-FR')}`
+                            : 'Jamais connecté'}
+                        </span>
+                        <span className="admin-login-count">{u.loginCount} connexion{u.loginCount > 1 ? 's' : ''}</span>
                       </div>
                     </div>
                   ))}

@@ -86,32 +86,21 @@
   border-radius: 20px;
 }
 
-.admin-row-header {
-  background: var(--color-surface) !important;
-  padding: 8px 20px;
-}
-
-.admin-stats-header {
+.admin-login-stats {
   display: flex;
-  gap: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
   flex-shrink: 0;
+  text-align: right;
 }
-.admin-stats-header span {
-  width: 52px;
-  text-align: center;
-  font-size: 15px;
+.admin-last-login {
+  font-size: 12px;
+  color: var(--color-text-secondary);
 }
-
-.admin-stats {
-  display: flex;
-  gap: 0;
-  flex-shrink: 0;
-}
-.stat-item {
-  width: 52px;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 500;
+.admin-login-count {
+  font-size: 12px;
+  font-weight: 600;
   color: var(--color-text);
 }
 

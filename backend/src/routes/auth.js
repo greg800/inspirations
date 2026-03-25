@@ -69,6 +69,11 @@ router.post('/login', async (req, res) => {
   const valid = await bcrypt.compare(password, user.password)
   if (!valid) return res.status(401).json({ error: 'Identifiants incorrects' })
 
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date(), loginCount: { increment: 1 } },
+  })
+
   const token = jwt.sign(
     { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin, isApproved: user.isApproved },
     SECRET,

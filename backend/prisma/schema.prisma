@@ -16,6 +16,8 @@ model User {
   isAdmin    Boolean   @default(false)
   zoomLevel              Int       @default(50)
   notificationsReadAt    DateTime?
+  lastLoginAt            DateTime?
+  loginCount             Int       @default(0)
   createdAt              DateTime  @default(now())
   contents   Content[]
   reviews    Review[]
