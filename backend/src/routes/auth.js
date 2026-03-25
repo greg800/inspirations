@@ -11,12 +11,12 @@ const prisma = new PrismaClient()
 
 function getMailTransporter() {
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
+    host: 'smtp.resend.com',
+    port: 587,
+    secure: false,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      user: 'resend',
+      pass: process.env.RESEND_API_KEY,
     },
   })
 }
