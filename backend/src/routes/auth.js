@@ -10,6 +10,13 @@ const router = Router()
 const prisma = new PrismaClient()
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+const EMAIL_FOOTER = `
+  <div style="margin-top:40px; padding-top:20px; border-top:1px solid #e8e0d8; text-align:center;">
+    <img src="https://inspirations.top/logo.png" alt="Inspirations" width="48" height="48" style="display:inline-block;"/>
+    <div style="margin-top:8px; font-size:12px; color:#999;">inspirations.top</div>
+  </div>
+`
+
 router.post('/register', async (req, res) => {
   const { email, password, name } = req.body
   if (!email || !password || !name) return res.status(400).json({ error: 'Champs manquants' })
@@ -24,6 +31,32 @@ router.post('/register', async (req, res) => {
     SECRET,
     { expiresIn: '7d' }
   )
+
+  resend.emails.send({
+    from: 'Inspirations <noreply@inspirations.top>',
+    to: user.email,
+    subject: 'Félicitations, ton temps libre est en danger',
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; color: #2d1a0e; line-height: 1.6;">
+        <p>Bonjour ${user.name},</p>
+        <p>Ton compte est créé — bienvenue dans le groupe !</p>
+        <p>Inspirations.top, c'est l'endroit où on partage ce qui vaut vraiment le coup&nbsp;: livres, films, podcasts… les trucs qu'on recommanderait à un ami autour d'un café.</p>
+        <p><strong>Pour bien démarrer&nbsp;:</strong></p>
+        <p>📱 <strong>Installe l'app sur ton téléphone</strong><br/>
+        Ouvre inspirations.top dans ton navigateur → "Ajouter à l'écran d'accueil". Tu auras l'app en un tap, sans passer par un store.</p>
+        <p>🔍 <strong>Explore la galerie</strong><br/>
+        Filtre par support, genre ou contributeur. Trie par date ou par note. Zoom in/out sur les vignettes à ta convenance.</p>
+        <p>✨ <strong>Partage ton premier contenu</strong><br/>
+        Clique sur "+" et ajoute un livre, film ou podcast qui t'a marqué. Tu peux coller une URL pour préremplir les champs automatiquement — c'est rapide.</p>
+        <p>👍 <strong>Réagis aux partages des autres</strong><br/>
+        Vote, laisse un avis, donne une note. C'est ça qui fait vivre l'endroit.</p>
+        <p>L'onglet Activité te tient au courant des derniers ajouts et avis du groupe.</p>
+        <p>Bonne exploration !<br/>Greg</p>
+        ${EMAIL_FOOTER}
+      </div>
+    `,
+  }).catch(() => {}) // ne pas bloquer la réponse si l'email échoue
+
   res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin, isApproved: user.isApproved, zoomLevel: user.zoomLevel } })
 })
 
@@ -74,11 +107,14 @@ router.post('/forgot-password', async (req, res) => {
     to: user.email,
     subject: 'Réinitialisation de votre mot de passe',
     html: `
-      <p>Bonjour ${user.name},</p>
-      <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
-      <p><a href="${resetLink}">Cliquez ici pour définir un nouveau mot de passe</a></p>
-      <p>Ce lien expire dans 1 heure.</p>
-      <p>Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; color: #2d1a0e; line-height: 1.6;">
+        <p>Bonjour ${user.name},</p>
+        <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
+        <p><a href="${resetLink}" style="color:#3d1f0e; font-weight:bold;">Cliquez ici pour définir un nouveau mot de passe</a></p>
+        <p>Ce lien expire dans 1 heure.</p>
+        <p>Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
+        ${EMAIL_FOOTER}
+      </div>
     `,
   })
 
