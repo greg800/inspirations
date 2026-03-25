@@ -19,15 +19,15 @@ l-3 238 -32 80 c-208 516 -827 898 -1603 989 -131 15 -382 26 -485 20z m473
 
   <!-- Étoiles dorées (outer r=35, inner r=14) -->
   <defs>
-    <polygon id="star" points="0,-35 8.23,-11.33 33.29,-10.82 13.31,4.33 20.58,28.32 0,14 -20.58,28.32 -13.31,4.33 -33.29,-10.82 -8.23,-11.33" fill="#F5B800"/>
+    <polygon id="star" points="0,-55 12.94,-17.80 52.31,-17.00 20.92,6.80 32.34,44.50 0,22 -32.34,44.50 -20.92,6.80 -52.31,-17.00 -12.94,-17.80" fill="#F5B800"/>
   </defs>
 
   <!-- Rangée 1 : 3 étoiles -->
-  <use href="#star" transform="translate(101, 151)"/>
-  <use href="#star" transform="translate(202, 151)"/>
-  <use href="#star" transform="translate(304, 151)"/>
+  <use href="#star" transform="translate(97, 152)"/>
+  <use href="#star" transform="translate(202, 152)"/>
+  <use href="#star" transform="translate(307, 152)"/>
 
   <!-- Rangée 2 : 2 étoiles centrées -->
-  <use href="#star" transform="translate(152, 210)"/>
-  <use href="#star" transform="translate(253, 210)"/>
+  <use href="#star" transform="translate(150, 257)"/>
+  <use href="#star" transform="translate(255, 257)"/>
 </svg>
