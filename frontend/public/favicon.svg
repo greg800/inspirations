@@ -1,18 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
   <defs>
     <g id="star">
-      <polygon points="0,-14 3.23,-4.45 13.32,-4.33 5.23,1.70 8.23,11.33 0,5.5 -8.23,11.33 -5.23,1.70 -13.32,-4.33 -3.23,-4.45" fill="#F5C518"/>
+      <polygon points="0,-16 3.80,-5.24 15.19,-5.24 6.16,2.00 9.51,12.94 0,6.50 -9.51,12.94 -6.16,2.00 -15.19,-5.24 -3.80,-5.24" fill="#F5B800"/>
     </g>
   </defs>
-  <!-- Tail -->
-  <polygon points="62,125 88,130 30,172" fill="white" stroke="#1a1a1a" stroke-width="6" stroke-linejoin="round"/>
-  <!-- Main bubble (drawn on top to hide tail seams) -->
-  <ellipse cx="105" cy="82" rx="80" ry="55" fill="white" stroke="#1a1a1a" stroke-width="6"/>
+
+  <!-- Tail (drawn first, behind bubble) -->
+  <polygon points="55,122 82,130 26,176" fill="white"/>
+
+  <!-- Main bubble -->
+  <ellipse cx="105" cy="80" rx="83" ry="57" fill="white" stroke="#1a1a1a" stroke-width="8"/>
+
+  <!-- Tail outline (only the two exposed sides) -->
+  <polyline points="55,122 26,176 82,130" fill="none" stroke="#1a1a1a" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
   <!-- Stars row 1 -->
-  <use href="#star" transform="translate(65, 76)"/>
-  <use href="#star" transform="translate(105, 76)"/>
-  <use href="#star" transform="translate(145, 76)"/>
+  <use href="#star" transform="translate(65, 74)"/>
+  <use href="#star" transform="translate(105, 74)"/>
+  <use href="#star" transform="translate(145, 74)"/>
+
   <!-- Stars row 2 -->
-  <use href="#star" transform="translate(85, 102)"/>
-  <use href="#star" transform="translate(125, 102)"/>
+  <use href="#star" transform="translate(85, 101)"/>
+  <use href="#star" transform="translate(125, 101)"/>
 </svg>
