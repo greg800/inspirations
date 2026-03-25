@@ -2,24 +2,13 @@ import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 import { PrismaClient } from '@prisma/client'
 import { SECRET } from '../middleware/auth.js'
 
 const router = Router()
 const prisma = new PrismaClient()
-
-function getMailTransporter() {
-  return nodemailer.createTransport({
-    host: 'smtp.resend.com',
-    port: 587,
-    secure: false,
-    auth: {
-      user: 'resend',
-      pass: process.env.RESEND_API_KEY,
-    },
-  })
-}
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 router.post('/register', async (req, res) => {
   const { email, password, name } = req.body
@@ -80,9 +69,8 @@ router.post('/forgot-password', async (req, res) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
   const resetLink = `${frontendUrl}/reset-password?token=${rawToken}`
 
-  const transporter = getMailTransporter()
-  await transporter.sendMail({
-    from: process.env.FROM_EMAIL || process.env.SMTP_USER,
+  await resend.emails.send({
+    from: 'Inspirations <noreply@inspirations.top>',
     to: user.email,
     subject: 'Réinitialisation de votre mot de passe',
     html: `
