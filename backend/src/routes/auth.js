@@ -13,7 +13,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_FOOTER = `
   <div style="margin-top:40px; padding-top:20px; border-top:1px solid #e8e0d8; text-align:center;">
     <img src="https://inspirations.top/logo.png" alt="Inspirations" width="48" height="48" style="display:inline-block;"/>
-    <div style="margin-top:8px; font-size:12px; color:#999;">inspirations.top</div>
+    <div style="margin-top:8px; font-size:12px;"><a href="https://inspirations.top" style="color:#999; text-decoration:none;">inspirations.top</a></div>
   </div>
 `
 
