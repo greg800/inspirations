@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
+
 import { useGalleryFilter } from '../lib/galleryFilter.jsx'
 import { api } from '../lib/api.js'
 import './Auth.css'
@@ -12,10 +13,11 @@ function formatDate(dateStr) {
 }
 
 export default function Profile() {
-  const { user, updateUser, setUnreadNotifications } = useAuth()
+  const { user, updateUser, logout, setUnreadNotifications } = useAuth()
   const { setFilter, setFiltersVisible } = useGalleryFilter()
   const navigate = useNavigate()
   const [pseudo, setPseudo] = useState(user?.name || '')
+  const isDirty = pseudo.trim() !== (user?.name || '')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [notifications, setNotifications] = useState([])
@@ -137,13 +139,26 @@ export default function Profile() {
             <span className="hint">L'email ne peut pas être modifié.</span>
           </div>
           {error && <p className="msg-error">{error}</p>}
-          <button type="submit" className="btn full" disabled={loading}>
-            {loading ? 'Enregistrement…' : 'Enregistrer'}
-          </button>
-          <button type="button" className="btn-ghost full" style={{ marginTop: 10 }} onClick={() => navigate(-1)}>
-            Annuler
-          </button>
+          {isDirty && (
+            <>
+              <button type="submit" className="btn full" disabled={loading}>
+                {loading ? 'Enregistrement…' : 'Enregistrer'}
+              </button>
+              <button type="button" className="btn-ghost full" style={{ marginTop: 10 }} onClick={() => setPseudo(user?.name || '')}>
+                Annuler
+              </button>
+            </>
+          )}
         </form>
+
+        <hr className="profile-divider" />
+
+        <button
+          className="btn-ghost full"
+          onClick={() => { logout(); navigate('/') }}
+        >
+          Déconnexion
+        </button>
       </div>
     </div>
   )

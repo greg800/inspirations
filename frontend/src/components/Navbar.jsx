@@ -33,7 +33,6 @@ export default function Navbar() {
                   <span className="navbar-notif-badge">{unreadNotifications > 99 ? '99+' : unreadNotifications}</span>
                 )}
               </Link>
-              <button className="btn-ghost" onClick={handleLogout}>Déconnexion</button>
             </>
           ) : (
             <>

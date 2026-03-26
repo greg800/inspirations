@@ -72,7 +72,8 @@ export default function MobileBottomBar() {
 
   // Mode admin / activité — retour accueil
   const isAdminPage = pathname === '/admin'
-  if (isAdminPage || isActivity) {
+  const isProfile = pathname === '/profile'
+  if (isAdminPage || isActivity || isProfile) {
     return (
       <div className="mobile-bottom-bar">
         <div className="mobile-bottom-cta">
