@@ -69,6 +69,13 @@ export default function Detail() {
   const [linkPreview, setLinkPreview] = useState(null)
   const [votesData, setVotesData] = useState({ up: 0, down: 0, upVoters: [], downVoters: [], myVote: null })
   const [voteLoading, setVoteLoading] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
+
+  function handleShare() {
+    const url = `https://inspirations.top/content/${id}`
+    const msg = `Hello, je t'invite à te connecter sur ${url} afin que tu puisses consulter "${content.title}", j'aime beaucoup et je voudrais avoir ton avis là-dessus.\n\n${user?.name || ''}`
+    navigator.clipboard.writeText(msg).then(() => setShowShareModal(true)).catch(() => setShowShareModal(true))
+  }
 
   useEffect(() => {
     api.content.get(id)
@@ -209,7 +216,17 @@ export default function Detail() {
   return (
     <div className="detail-page">
       <div className="container">
-        <Link to="/" className="detail-back">← Retour</Link>
+        <div className="detail-topbar">
+          <Link to="/" className="detail-back">← Retour</Link>
+          {user && (
+            <button className="share-btn" onClick={handleShare} aria-label="Partager">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+            </button>
+          )}
+        </div>
 
         <div className="detail-layout">
 
@@ -426,6 +443,15 @@ export default function Detail() {
           </div>
         </div>
       </div>
+
+      {showShareModal && (
+        <div className="share-modal-overlay" onClick={() => setShowShareModal(false)}>
+          <div className="share-modal" onClick={e => e.stopPropagation()}>
+            <p>Le message avec le lien vers cette œuvre est bien copié dans le presse-papier, à toi de le coller dans une autre app !</p>
+            <button className="btn full" onClick={() => setShowShareModal(false)}>Ok, c'est compris</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
