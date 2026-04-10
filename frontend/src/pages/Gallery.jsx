@@ -11,6 +11,12 @@ function zoomToMinWidth(zoom) {
   return Math.round(60 + (zoom - 10) * (220 - 60) / 90)
 }
 
+const FunnelIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M4.25 5.61C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39A.998.998 0 0 0 18.95 4H5.04a1 1 0 0 0-.79 1.61z"/>
+  </svg>
+)
+
 const ClockIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
     <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
@@ -32,7 +38,13 @@ const ArrowDown = () => (
 
 export default function Gallery() {
   const { user, updateUser } = useAuth()
-  const { filtersVisible, setHasActiveFilters, filters, setFilter, resetFilters, sort, setSort, search, setSearch } = useGalleryFilter()
+  const { filtersVisible, setFiltersVisible, hasActiveFilters, setHasActiveFilters, filters, setFilter, resetFilters, sort, setSort, search, setSearch } = useGalleryFilter()
+
+  function toggleFilters() {
+    const next = !filtersVisible
+    setFiltersVisible(next)
+    if (next) window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const [allContents, setAllContents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -123,25 +135,35 @@ export default function Gallery() {
           <p className="gallery-subtitle">Les livres, podcasts, films et articles qui changent une vie.</p>
         </header>
 
-        <div className="search-bar">
-          <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            type="search"
-            placeholder="Titre, auteur…"
-            value={search}
-            onChange={e => {
-              const val = e.target.value
-              clearTimeout(searchTimer.current)
-              searchTimer.current = setTimeout(() => setSearch(val), 300)
-            }}
-            className="search-input"
-            aria-label="Rechercher"
-          />
-          {search && (
-            <button className="search-clear" onClick={() => { setSearch(''); document.querySelector('.search-input').value = '' }} aria-label="Effacer">×</button>
-          )}
+        <div className="search-row">
+          <div className="search-bar">
+            <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="search"
+              placeholder="Titre, auteur…"
+              value={search}
+              onChange={e => {
+                const val = e.target.value
+                clearTimeout(searchTimer.current)
+                searchTimer.current = setTimeout(() => setSearch(val), 300)
+              }}
+              className="search-input"
+              aria-label="Rechercher"
+            />
+            {search && (
+              <button className="search-clear" onClick={() => { setSearch(''); document.querySelector('.search-input').value = '' }} aria-label="Effacer">×</button>
+            )}
+          </div>
+          <button
+            className={`search-filter-btn${filtersVisible ? ' active' : ''}`}
+            onClick={toggleFilters}
+            aria-label="Filtres"
+          >
+            <FunnelIcon />
+            {hasActiveFilters && <span className="search-filter-dot" />}
+          </button>
         </div>
 
         <div className={`filters${filtersVisible ? ' filters--visible' : ''}`}>

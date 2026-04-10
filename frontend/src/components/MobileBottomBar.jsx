@@ -1,12 +1,11 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { useGalleryFilter } from '../lib/galleryFilter.jsx'
 import { useStickyActions } from '../lib/stickyActions.jsx'
 import './MobileBottomBar.css'
 
-const FunnelIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M4.25 5.61C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39A.998.998 0 0 0 18.95 4H5.04a1 1 0 0 0-.79 1.61z"/>
+const HeartIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
   </svg>
 )
 
@@ -20,17 +19,10 @@ export default function MobileBottomBar() {
   const { user } = useAuth()
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { filtersVisible, setFiltersVisible, hasActiveFilters } = useGalleryFilter()
   const { actions } = useStickyActions()
   const isGallery = pathname === '/'
   const isActivity = pathname === '/activity'
   const isForm = pathname === '/create' || pathname.startsWith('/edit/')
-
-  function toggleFilters() {
-    const next = !filtersVisible
-    setFiltersVisible(next)
-    if (next) window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
 
   // Mode formulaire (création/édition)
   if (isForm) {
@@ -85,21 +77,13 @@ export default function MobileBottomBar() {
 
   // Mode galerie / défaut
   const cta = user
-    ? (user.isApproved || user.isAdmin) ? <Link to="/create" className="mobile-bottom-btn">Partager</Link> : null
+    ? (user.isApproved || user.isAdmin)
+      ? <Link to="/create" className="mobile-bottom-btn btn-share"><HeartIcon /> Partager</Link>
+      : null
     : <Link to="/register" className="mobile-bottom-btn">Créer un compte</Link>
 
   return (
     <div className="mobile-bottom-bar">
-      {isGallery && (
-        <button
-          className={`mobile-icon-btn${filtersVisible ? ' active' : ''}`}
-          onClick={toggleFilters}
-          aria-label="Filtres"
-        >
-          <FunnelIcon />
-          {hasActiveFilters && <span className="mobile-funnel-dot" />}
-        </button>
-      )}
       {isGallery && (
         <button
           className={`mobile-icon-btn${isActivity ? ' active' : ''}`}

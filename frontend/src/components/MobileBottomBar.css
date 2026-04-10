@@ -101,6 +101,14 @@
   opacity: 0.85;
 }
 
+/* Bouton Partager avec icône cœur */
+.mobile-bottom-btn.btn-share {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
 /* Mode formulaire : Enregistrer + Annuler côte à côte, centrés */
 .mobile-bottom-bar.form-mode {
   justify-content: center;
