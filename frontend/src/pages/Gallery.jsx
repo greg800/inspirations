@@ -136,6 +136,7 @@ export default function Gallery() {
           <p className="gallery-subtitle">Les livres, podcasts, films et articles qui changent une vie.</p>
         </header>
 
+        {user && (
         <div className="search-row">
           <div className="search-bar">
             <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -166,6 +167,7 @@ export default function Gallery() {
             {hasActiveFilters && <span className="search-filter-dot" />}
           </button>
         </div>
+        )}
 
         <div className={`filters${filtersVisible ? ' filters--visible' : ''}`}>
 

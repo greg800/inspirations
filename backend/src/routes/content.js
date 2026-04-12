@@ -30,14 +30,31 @@ function wordCount(text) {
   return text.trim().split(/\s+/).filter(Boolean).length
 }
 
-// GET all unique contributor names (publishers + reviewers)
-router.get('/contributors', async (req, res) => {
-  const [publishers, reviewers] = await Promise.all([
-    prisma.content.findMany({ select: { user: { select: { name: true } } }, distinct: ['userId'] }),
-    prisma.review.findMany({ select: { user: { select: { name: true } } }, distinct: ['userId'] }),
-  ])
+// GET all unique contributor names (publishers + reviewers) — filtrés par bulles de l'utilisateur
+router.get('/contributors', optionalAuth, async (req, res) => {
+  if (!req.user) return res.json([])
+
+  const memberships = await prisma.bubbleMembership.findMany({
+    where: { userId: req.user.id },
+    select: { bubbleId: true },
+  })
+  const bubbleIds = memberships.map(m => m.bubbleId)
+  if (bubbleIds.length === 0) return res.json([])
+
+  const contents = await prisma.content.findMany({
+    where: { bubbleId: { in: bubbleIds } },
+    select: { id: true, user: { select: { name: true } } },
+  })
+  const contentIds = contents.map(c => c.id)
+
+  const reviewers = await prisma.review.findMany({
+    where: { contentId: { in: contentIds } },
+    select: { user: { select: { name: true } } },
+    distinct: ['userId'],
+  })
+
   const names = [...new Set([
-    ...publishers.map(c => c.user.name),
+    ...contents.map(c => c.user.name),
     ...reviewers.map(r => r.user.name),
   ])].sort()
   res.json(names)
