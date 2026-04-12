@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { useAuth } from '../lib/auth.jsx'
@@ -14,7 +14,7 @@ export default function ContentForm({ editing }) {
   const { user } = useAuth()
   const [form, setForm] = useState({
     title: '', author: '', summary: '', whyRead: '',
-    rating: '', support: '', genre: '', publishDate: '', url: '', bubbleId: '',
+    rating: '', support: '', genre: '', url: '', bubbleId: '',
   })
   const [coverFile, setCoverFile] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
@@ -23,6 +23,8 @@ export default function ContentForm({ editing }) {
   const [supports, setSupports] = useState([])
   const [genres, setGenres] = useState([])
   const [bubbles, setBubbles] = useState([])
+  const [linkPreview, setLinkPreview] = useState(null)
+  const urlTimer = useRef(null)
 
   useEffect(() => {
     api.tags.list('support').then(ts => setSupports(ts.map(t => t.value)))
@@ -30,7 +32,6 @@ export default function ContentForm({ editing }) {
     api.bubbles.mine().then(bs => {
       setBubbles(bs)
       if (!editing && bs.length > 0) {
-        // Pré-sélectionner la bulle par défaut, sinon la première
         const stored = JSON.parse(localStorage.getItem('user') || '{}')
         const defaultId = stored.defaultBubbleId
         const preselect = (defaultId && bs.find(b => b.id === defaultId)) ? defaultId : bs[0].id
@@ -41,23 +42,34 @@ export default function ContentForm({ editing }) {
       api.content.get(id).then(c => {
         setForm({
           title: c.title,
-          author: c.author,
-          summary: c.summary,
+          author: c.author || '',
+          summary: c.summary || '',
           whyRead: c.whyRead,
           rating: String(c.rating),
           support: c.support || '',
           genre: c.genre || '',
-          publishDate: c.publishDate ? c.publishDate.slice(0, 10) : '',
           url: c.url || '',
           bubbleId: c.bubbleId ? String(c.bubbleId) : '',
         })
         setCoverPreview(c.coverImage)
+        if (c.url) api.linkPreview(c.url).then(setLinkPreview).catch(() => {})
       })
     }
   }, [editing, id])
 
   function set(key, value) {
     setForm(f => ({ ...f, [key]: value }))
+  }
+
+  function handleUrlChange(val) {
+    set('url', val)
+    setLinkPreview(null)
+    clearTimeout(urlTimer.current)
+    if (val.startsWith('http')) {
+      urlTimer.current = setTimeout(() => {
+        api.linkPreview(val).then(setLinkPreview).catch(() => {})
+      }, 700)
+    }
   }
 
   function handleCover(e) {
@@ -74,7 +86,7 @@ export default function ContentForm({ editing }) {
     const wWhyRead = wordCount(form.whyRead)
     if (wWhyRead < 20) return setError(`"Pourquoi en faire l'expérience" trop court : ${wWhyRead} mots (minimum 20)`)
     if (!editing && !coverFile) return setError('Image de couverture requise')
-    if (!form.bubbleId) return setError('Veuillez choisir une bulle')
+    if (bubbles.length !== 1 && !form.bubbleId) return setError('Veuillez choisir une bulle')
 
     const fd = new FormData()
     Object.entries(form).forEach(([k, v]) => { if (v) fd.append(k, v) })
@@ -103,9 +115,12 @@ export default function ContentForm({ editing }) {
         <h1>{editing ? 'Modifier' : 'Partager une inspiration'}</h1>
 
         <form id="content-form" onSubmit={handleSubmit} className="content-form">
-          {/* Obligatoires */}
+
+          {/* Section principale */}
           <div className="form-section">
             <h2>Informations principales</h2>
+
+            {/* Bulle — seulement si plusieurs bulles */}
             {bubbles.length === 0 && (
               <div className="field">
                 <label>Bulle *</label>
@@ -123,20 +138,49 @@ export default function ContentForm({ editing }) {
                 </select>
               </div>
             )}
+
+            {/* Titre */}
+            <div className="field">
+              <label>Titre *</label>
+              <input value={form.title} onChange={e => set('title', e.target.value)} required />
+            </div>
+
+            {/* URL + preview inline */}
+            <div className="field">
+              <label>Lien internet <span className="optional-label">optionnel</span></label>
+              <div className="url-preview-row">
+                <input
+                  type="url"
+                  value={form.url}
+                  onChange={e => handleUrlChange(e.target.value)}
+                  placeholder="https://…"
+                  className="url-input"
+                />
+                {linkPreview && (
+                  <a href={form.url} target="_blank" rel="noopener noreferrer" className="url-preview-thumb">
+                    {linkPreview.image
+                      ? <img src={linkPreview.image} alt="" />
+                      : <span className="url-preview-domain">{linkPreview.domain}</span>
+                    }
+                  </a>
+                )}
+              </div>
+              {linkPreview?.title && (
+                <span className="hint">{linkPreview.domain} — {linkPreview.title}</span>
+              )}
+            </div>
+
+            {/* Auteur + Note */}
             <div className="form-row">
               <div className="field">
-                <label>Titre *</label>
-                <input value={form.title} onChange={e => set('title', e.target.value)} required />
+                <label>Auteur <span className="optional-label">optionnel</span></label>
+                <input value={form.author} onChange={e => set('author', e.target.value)} />
               </div>
               <div className="field">
-                <label>Auteur *</label>
-                <input value={form.author} onChange={e => set('author', e.target.value)} required />
+                <label>Note /20 *</label>
+                <input type="number" min="0" max="20" step="0.5" value={form.rating}
+                  onChange={e => set('rating', e.target.value)} required />
               </div>
-            </div>
-            <div className="field">
-              <label>Note /20 *</label>
-              <input type="number" min="0" max="20" step="0.5" value={form.rating}
-                onChange={e => set('rating', e.target.value)} required />
             </div>
           </div>
 
@@ -169,15 +213,15 @@ export default function ContentForm({ editing }) {
               </span>
             </div>
             <div className="field">
-              <label>Résumé *</label>
+              <label>Résumé <span className="optional-label">optionnel</span></label>
               <textarea rows={10} value={form.summary}
-                onChange={e => set('summary', e.target.value)} required />
+                onChange={e => set('summary', e.target.value)} />
             </div>
           </div>
 
           {/* Optionnels */}
           <div className="form-section">
-            <h2>Informations complémentaires <span className="optional-label">optionnel</span></h2>
+            <h2>Catégories <span className="optional-label">optionnel</span></h2>
             <div className="form-row">
               <div className="field">
                 <label>Support</label>
@@ -193,17 +237,6 @@ export default function ContentForm({ editing }) {
                   {genres.map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
               </div>
-              <div className="field">
-                <label>Date de publication</label>
-                <input type="date" value={form.publishDate}
-                  onChange={e => set('publishDate', e.target.value)} />
-              </div>
-            </div>
-            <div className="field">
-              <label>Lien internet</label>
-              <input type="url" value={form.url} onChange={e => set('url', e.target.value)}
-                placeholder="https://…" />
-              <span className="hint">Pour les articles et podcasts en ligne</span>
             </div>
           </div>
 

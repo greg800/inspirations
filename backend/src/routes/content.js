@@ -233,7 +233,7 @@ router.patch('/:id/bubble', requireApproved, async (req, res) => {
 router.post('/', requireApproved, upload.single('coverImage'), async (req, res) => {
   const { title, author, summary, whyRead, rating, support, genre, publishDate, url, bubbleId } = req.body; const sponsor = req.user.name
 
-  if (!title || !author || !summary || !whyRead || !rating) {
+  if (!title || !whyRead || !rating) {
     return res.status(400).json({ error: 'Champs obligatoires manquants' })
   }
   if (!req.file) return res.status(400).json({ error: 'Image de couverture requise' })
