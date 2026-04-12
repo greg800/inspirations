@@ -286,7 +286,7 @@ export default function Detail() {
             <p className="detail-author">{content.author}</p>
             <div className="detail-shared">
               Partagé par <strong>{content.sponsor}</strong>
-              {content.bubble && (
+              {content.bubble && userBubbles.length > 1 && (
                 <span className="detail-bubble-badge">🫧 {content.bubble.name}</span>
               )}
             </div>

@@ -106,19 +106,23 @@ export default function ContentForm({ editing }) {
           {/* Obligatoires */}
           <div className="form-section">
             <h2>Informations principales</h2>
-            <div className="field">
-              <label>Bulle *</label>
-              {bubbles.length === 0 ? (
+            {bubbles.length === 0 && (
+              <div className="field">
+                <label>Bulle *</label>
                 <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: 0 }}>
                   Vous n'appartenez à aucune bulle. Créez-en une depuis votre profil.
                 </p>
-              ) : (
+              </div>
+            )}
+            {bubbles.length > 1 && (
+              <div className="field">
+                <label>Bulle *</label>
                 <select value={form.bubbleId} onChange={e => set('bubbleId', e.target.value)} required>
-                  {bubbles.length > 1 && <option value="">— Choisir une bulle</option>}
+                  <option value="">— Choisir une bulle</option>
                   {bubbles.map(b => <option key={b.id} value={String(b.id)}>🫧 {b.name}</option>)}
                 </select>
-              )}
-            </div>
+              </div>
+            )}
             <div className="form-row">
               <div className="field">
                 <label>Titre *</label>
