@@ -3,7 +3,6 @@ import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
 import authRoutes from './routes/auth.js'
 import contentRoutes from './routes/content.js'
 import adminRoutes from './routes/admin.js'
@@ -50,39 +49,55 @@ if (isProd) {
   })
 }
 
-// Seed initial : créer la bulle CastelGreg et y rattacher tous les membres + contenus existants
+// Seed idempotent : créer la bulle CastelGreg et y rattacher TOUS les membres + contenus
+// Safe à chaque redémarrage — ne duplique jamais grâce aux skipDuplicates / upsert
 async function seedCastelGreg() {
   const prisma = new PrismaClient()
   try {
-    const existing = await prisma.bubble.findFirst({ where: { name: 'CastelGreg' } })
-    if (existing) {
-      // S'assurer que tout le contenu sans bulle est rattaché à CastelGreg
-      await prisma.content.updateMany({ where: { bubbleId: null }, data: { bubbleId: existing.id } })
-      return
+    // Trouver ou créer la bulle
+    let bubble = await prisma.bubble.findFirst({ where: { name: 'CastelGreg' } })
+
+    if (!bubble) {
+      const firstUser = await prisma.user.findFirst({ orderBy: { id: 'asc' } })
+      if (!firstUser) { console.log('Seed CastelGreg : aucun utilisateur trouvé, skip.'); return }
+      bubble = await prisma.bubble.create({
+        data: { name: 'CastelGreg', createdById: firstUser.id },
+      })
+      console.log('✅ Bulle CastelGreg créée')
     }
 
-    const admin = await prisma.user.findFirst({ where: { isAdmin: true } })
-    if (!admin) return
-
-    const bubble = await prisma.bubble.create({
-      data: { name: 'CastelGreg', createdById: admin.id },
-    })
-
+    // Ajouter TOUS les utilisateurs comme membres (skipDuplicates = idempotent)
     const users = await prisma.user.findMany()
     await prisma.bubbleMembership.createMany({
       data: users.map(u => ({ userId: u.id, bubbleId: bubble.id })),
       skipDuplicates: true,
     })
 
+    // Rattacher tout le contenu orphelin à CastelGreg
     await prisma.content.updateMany({ where: { bubbleId: null }, data: { bubbleId: bubble.id } })
 
-    console.log(`✅ Bulle CastelGreg créée avec ${users.length} membres`)
+    console.log(`✅ Bulle CastelGreg : ${users.length} membres, contenus orphelins rattachés`)
   } catch (err) {
     console.error('Erreur seed CastelGreg:', err)
   } finally {
     await prisma.$disconnect()
   }
 }
+
+// Endpoint admin pour déclencher le seed manuellement (utile après migration)
+app.post('/api/admin/seed-castelgreg', async (req, res) => {
+  const authHeader = req.headers.authorization
+  if (!authHeader) return res.status(401).json({ error: 'Non authentifié' })
+  try {
+    const { default: jwt } = await import('jsonwebtoken')
+    const token = authHeader.split(' ')[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'change-this-secret')
+    if (!decoded.isAdmin) return res.status(403).json({ error: 'Accès refusé' })
+  } catch { return res.status(401).json({ error: 'Token invalide' }) }
+
+  await seedCastelGreg()
+  res.json({ message: 'Seed CastelGreg exécuté' })
+})
 
 app.listen(PORT, async () => {
   console.log(`Backend : http://localhost:${PORT}`)
