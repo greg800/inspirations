@@ -68,4 +68,32 @@ router.delete('/content/purge-all', requireAdmin, async (req, res) => {
   res.json({ message: 'Tout le contenu supprimé' })
 })
 
+// POST seed CastelGreg — ajoute tous les users + contenus orphelins à CastelGreg
+router.post('/seed-castelgreg', requireAdmin, async (req, res) => {
+  try {
+    let bubble = await prisma.bubble.findFirst({ where: { name: 'CastelGreg' } })
+
+    if (!bubble) {
+      const firstUser = await prisma.user.findFirst({ orderBy: { id: 'asc' } })
+      if (!firstUser) return res.status(400).json({ error: 'Aucun utilisateur en base' })
+      bubble = await prisma.bubble.create({
+        data: { name: 'CastelGreg', createdById: firstUser.id },
+      })
+    }
+
+    const users = await prisma.user.findMany()
+    await prisma.bubbleMembership.createMany({
+      data: users.map(u => ({ userId: u.id, bubbleId: bubble.id })),
+      skipDuplicates: true,
+    })
+
+    await prisma.content.updateMany({ where: { bubbleId: null }, data: { bubbleId: bubble.id } })
+
+    res.json({ message: `CastelGreg synchronisée — ${users.length} membres, contenus rattachés` })
+  } catch (err) {
+    console.error('Seed CastelGreg error:', err)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 export default router

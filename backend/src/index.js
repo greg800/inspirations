@@ -84,20 +84,6 @@ async function seedCastelGreg() {
   }
 }
 
-// Endpoint admin pour déclencher le seed manuellement (utile après migration)
-app.post('/api/admin/seed-castelgreg', async (req, res) => {
-  const authHeader = req.headers.authorization
-  if (!authHeader) return res.status(401).json({ error: 'Non authentifié' })
-  try {
-    const { default: jwt } = await import('jsonwebtoken')
-    const token = authHeader.split(' ')[1]
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'change-this-secret')
-    if (!decoded.isAdmin) return res.status(403).json({ error: 'Accès refusé' })
-  } catch { return res.status(401).json({ error: 'Token invalide' }) }
-
-  await seedCastelGreg()
-  res.json({ message: 'Seed CastelGreg exécuté' })
-})
 
 app.listen(PORT, async () => {
   console.log(`Backend : http://localhost:${PORT}`)
