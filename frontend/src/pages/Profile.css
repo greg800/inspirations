@@ -126,3 +126,151 @@
 .profile-page .profile-box {
   max-width: 680px;
 }
+
+/* ── Bulles section ──────────────────────────────────────────────── */
+.bubbles-section {
+  margin-bottom: 8px;
+}
+
+.bubbles-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 14px 0;
+}
+
+.bubbles-empty {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 12px;
+}
+
+.bubbles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/* Pill de bulle */
+.bubble-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  width: fit-content;
+}
+.bubble-pill:hover {
+  border-color: var(--color-accent);
+}
+.bubble-pill.active {
+  border-color: var(--color-cta);
+  background: var(--color-surface);
+}
+
+.bubble-count {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+/* Panel qui s'ouvre sous la pill */
+.bubble-panel {
+  margin-top: 8px;
+  margin-left: 8px;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bubble-invite-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.bubble-invite-form input {
+  flex: 1;
+  min-width: 180px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--color-bg);
+  color: var(--color-text);
+  outline: none;
+}
+.bubble-invite-form input:focus {
+  border-color: var(--color-accent);
+}
+
+.bubble-invite-ok {
+  font-size: 13px;
+  color: #2e7d32;
+  margin: 0;
+}
+.bubble-invite-err {
+  font-size: 13px;
+  color: var(--color-error, #c62828);
+  margin: 0;
+}
+
+.bubble-leave-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family: inherit;
+  width: fit-content;
+}
+.bubble-leave-btn:hover {
+  color: var(--color-error, #c62828);
+}
+
+/* Bouton créer bulle */
+.bubble-create-toggle {
+  font-size: 13px;
+  padding: 8px 14px;
+  margin-top: 4px;
+}
+
+.bubble-create-form {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bubble-create-form input {
+  padding: 9px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--color-bg);
+  color: var(--color-text);
+  outline: none;
+}
+.bubble-create-form input:focus {
+  border-color: var(--color-accent);
+}
+
+.bubble-create-actions {
+  display: flex;
+  gap: 8px;
+}

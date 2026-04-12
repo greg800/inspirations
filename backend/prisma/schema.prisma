@@ -22,7 +22,10 @@ model User {
   contents   Content[]
   reviews    Review[]
   votes      Vote[]
-  passwordResetTokens PasswordResetToken[]
+  passwordResetTokens  PasswordResetToken[]
+  bubbleMemberships    BubbleMembership[]
+  bubblesCreated       Bubble[]           @relation("BubbleCreator")
+  bubbleInvitesSent    BubbleInvitation[] @relation("BubbleInviter")
 }
 
 model PasswordResetToken {
@@ -50,10 +53,45 @@ model Content {
   publishDate DateTime?
   userId      Int
   user        User      @relation(fields: [userId], references: [id])
+  bubbleId    Int?
+  bubble      Bubble?   @relation(fields: [bubbleId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   reviews     Review[]
   votes       Vote[]
+}
+
+model Bubble {
+  id          Int      @id @default(autoincrement())
+  name        String
+  createdAt   DateTime @default(now())
+  createdById Int
+  createdBy   User     @relation("BubbleCreator", fields: [createdById], references: [id])
+  members     BubbleMembership[]
+  contents    Content[]
+  invitations BubbleInvitation[]
+}
+
+model BubbleMembership {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  bubbleId  Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bubble    Bubble   @relation(fields: [bubbleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@unique([userId, bubbleId])
+}
+
+model BubbleInvitation {
+  id          Int      @id @default(autoincrement())
+  token       String   @unique
+  email       String
+  bubbleId    Int
+  invitedById Int
+  bubble      Bubble   @relation(fields: [bubbleId], references: [id], onDelete: Cascade)
+  invitedBy   User     @relation("BubbleInviter", fields: [invitedById], references: [id])
+  used        Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }
 
 model Tag {

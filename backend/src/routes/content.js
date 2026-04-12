@@ -49,7 +49,27 @@ router.get('/', optionalAuth, async (req, res) => {
   const pageNum = Math.max(1, parseInt(page) || 1)
   const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20))
 
+  // Filtrer par bulles de l'utilisateur connecté
+  let bubbleIds = null
+  if (req.user?.id) {
+    const memberships = await prisma.bubbleMembership.findMany({
+      where: { userId: req.user.id },
+      select: { bubbleId: true },
+    })
+    bubbleIds = memberships.map(m => m.bubbleId)
+  }
+
   const where = {}
+
+  // Restreindre aux bulles de l'utilisateur (ou montrer uniquement contenu sans bulle si pas connecté)
+  if (bubbleIds !== null && bubbleIds.length > 0) {
+    where.bubbleId = { in: bubbleIds }
+  } else if (bubbleIds !== null && bubbleIds.length === 0) {
+    // Membre d'aucune bulle → rien à montrer
+    return res.json({ items: [], total: 0, page: pageNum, hasMore: false })
+  }
+  // Si non connecté : pas de filtre bulle (comportement legacy, sera géré par auth en frontend)
+
   if (support) where.support = support
   if (genre) where.genre = genre
   if (minRating || maxRating) {
@@ -149,18 +169,25 @@ router.get('/:id', async (req, res) => {
 
 // POST create content (auth + approved)
 router.post('/', requireApproved, upload.single('coverImage'), async (req, res) => {
-  const { title, author, summary, whyRead, rating, support, genre, publishDate, url } = req.body; const sponsor = req.user.name
+  const { title, author, summary, whyRead, rating, support, genre, publishDate, url, bubbleId } = req.body; const sponsor = req.user.name
 
   if (!title || !author || !summary || !whyRead || !rating) {
     return res.status(400).json({ error: 'Champs obligatoires manquants' })
   }
   if (!req.file) return res.status(400).json({ error: 'Image de couverture requise' })
   if (wordCount(whyRead) < 20) return res.status(400).json({ error: `"Pourquoi en faire l'expérience" trop court (${wordCount(whyRead)} mots, minimum 20)` })
+  if (!bubbleId) return res.status(400).json({ error: 'Bulle requise' })
 
   const ratingNum = parseFloat(rating)
   if (isNaN(ratingNum) || ratingNum < 0 || ratingNum > 20) {
     return res.status(400).json({ error: 'Note invalide (0 à 20)' })
   }
+
+  // Vérifier que l'utilisateur est bien membre de la bulle
+  const membership = await prisma.bubbleMembership.findUnique({
+    where: { userId_bubbleId: { userId: req.user.id, bubbleId: parseInt(bubbleId) } },
+  })
+  if (!membership) return res.status(403).json({ error: 'Vous n\'êtes pas membre de cette bulle' })
 
   const content = await prisma.content.create({
     data: {
@@ -176,6 +203,7 @@ router.post('/', requireApproved, upload.single('coverImage'), async (req, res) 
       url: url || null,
       publishDate: publishDate ? new Date(publishDate) : null,
       userId: req.user.id,
+      bubbleId: parseInt(bubbleId),
     },
   })
   res.status(201).json(content)

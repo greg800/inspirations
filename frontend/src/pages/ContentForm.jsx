@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../lib/api.js'
+import { useAuth } from '../lib/auth.jsx'
 import './ContentForm.css'
 
 function wordCount(text) {
@@ -10,9 +11,10 @@ function wordCount(text) {
 export default function ContentForm({ editing }) {
   const navigate = useNavigate()
   const { id } = useParams()
+  const { user } = useAuth()
   const [form, setForm] = useState({
     title: '', author: '', summary: '', whyRead: '',
-    rating: '', support: '', genre: '', publishDate: '', url: '',
+    rating: '', support: '', genre: '', publishDate: '', url: '', bubbleId: '',
   })
   const [coverFile, setCoverFile] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
@@ -20,10 +22,18 @@ export default function ContentForm({ editing }) {
   const [loading, setLoading] = useState(false)
   const [supports, setSupports] = useState([])
   const [genres, setGenres] = useState([])
+  const [bubbles, setBubbles] = useState([])
 
   useEffect(() => {
     api.tags.list('support').then(ts => setSupports(ts.map(t => t.value)))
     api.tags.list('genre').then(ts => setGenres(ts.map(t => t.value)))
+    api.bubbles.mine().then(bs => {
+      setBubbles(bs)
+      // Pré-sélectionner si une seule bulle
+      if (bs.length === 1 && !editing) {
+        setForm(f => ({ ...f, bubbleId: String(bs[0].id) }))
+      }
+    }).catch(() => {})
     if (editing && id) {
       api.content.get(id).then(c => {
         setForm({
@@ -36,6 +46,7 @@ export default function ContentForm({ editing }) {
           genre: c.genre || '',
           publishDate: c.publishDate ? c.publishDate.slice(0, 10) : '',
           url: c.url || '',
+          bubbleId: c.bubbleId ? String(c.bubbleId) : '',
         })
         setCoverPreview(c.coverImage)
       })
@@ -60,6 +71,7 @@ export default function ContentForm({ editing }) {
     const wWhyRead = wordCount(form.whyRead)
     if (wWhyRead < 20) return setError(`"Pourquoi en faire l'expérience" trop court : ${wWhyRead} mots (minimum 20)`)
     if (!editing && !coverFile) return setError('Image de couverture requise')
+    if (!form.bubbleId) return setError('Veuillez choisir une bulle')
 
     const fd = new FormData()
     Object.entries(form).forEach(([k, v]) => { if (v) fd.append(k, v) })
@@ -91,6 +103,19 @@ export default function ContentForm({ editing }) {
           {/* Obligatoires */}
           <div className="form-section">
             <h2>Informations principales</h2>
+            <div className="field">
+              <label>Bulle *</label>
+              {bubbles.length === 0 ? (
+                <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: 0 }}>
+                  Vous n'appartenez à aucune bulle. Créez-en une depuis votre profil.
+                </p>
+              ) : (
+                <select value={form.bubbleId} onChange={e => set('bubbleId', e.target.value)} required>
+                  {bubbles.length > 1 && <option value="">— Choisir une bulle</option>}
+                  {bubbles.map(b => <option key={b.id} value={String(b.id)}>🫧 {b.name}</option>)}
+                </select>
+              )}
+            </div>
             <div className="form-row">
               <div className="field">
                 <label>Titre *</label>

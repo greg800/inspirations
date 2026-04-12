@@ -2,6 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 import authRoutes from './routes/auth.js'
 import contentRoutes from './routes/content.js'
 import adminRoutes from './routes/admin.js'
@@ -12,6 +14,7 @@ import votesRouter from './routes/votes.js'
 import usersRouter from './routes/users.js'
 import activityRouter from './routes/activity.js'
 import notificationsRouter from './routes/notifications.js'
+import bubblesRouter from './routes/bubbles.js'
 
 const app = express()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -35,6 +38,7 @@ app.use('/api/content/:id/votes', votesRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/activity', activityRouter)
 app.use('/api/notifications', notificationsRouter)
+app.use('/api/bubbles', bubblesRouter)
 
 // En production : servir le frontend buildé
 if (isProd) {
@@ -46,4 +50,41 @@ if (isProd) {
   })
 }
 
-app.listen(PORT, () => console.log(`Backend : http://localhost:${PORT}`))
+// Seed initial : créer la bulle CastelGreg et y rattacher tous les membres + contenus existants
+async function seedCastelGreg() {
+  const prisma = new PrismaClient()
+  try {
+    const existing = await prisma.bubble.findFirst({ where: { name: 'CastelGreg' } })
+    if (existing) {
+      // S'assurer que tout le contenu sans bulle est rattaché à CastelGreg
+      await prisma.content.updateMany({ where: { bubbleId: null }, data: { bubbleId: existing.id } })
+      return
+    }
+
+    const admin = await prisma.user.findFirst({ where: { isAdmin: true } })
+    if (!admin) return
+
+    const bubble = await prisma.bubble.create({
+      data: { name: 'CastelGreg', createdById: admin.id },
+    })
+
+    const users = await prisma.user.findMany()
+    await prisma.bubbleMembership.createMany({
+      data: users.map(u => ({ userId: u.id, bubbleId: bubble.id })),
+      skipDuplicates: true,
+    })
+
+    await prisma.content.updateMany({ where: { bubbleId: null }, data: { bubbleId: bubble.id } })
+
+    console.log(`✅ Bulle CastelGreg créée avec ${users.length} membres`)
+  } catch (err) {
+    console.error('Erreur seed CastelGreg:', err)
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
+app.listen(PORT, async () => {
+  console.log(`Backend : http://localhost:${PORT}`)
+  await seedCastelGreg()
+})

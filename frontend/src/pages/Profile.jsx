@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-
 import { useGalleryFilter } from '../lib/galleryFilter.jsx'
 import { api } from '../lib/api.js'
 import './Auth.css'
@@ -22,6 +21,66 @@ export default function Profile() {
   const [loading, setLoading] = useState(false)
   const [notifications, setNotifications] = useState([])
   const [notifsLoading, setNotifsLoading] = useState(true)
+
+  // Bulles
+  const [bubbles, setBubbles] = useState([])
+  const [bubblesLoading, setBubblesLoading] = useState(true)
+  const [selectedBubble, setSelectedBubble] = useState(null) // bulle cliquée
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteStatus, setInviteStatus] = useState('') // '' | 'sending' | 'sent' | 'error'
+  const [inviteError, setInviteError] = useState('')
+  const [newBubbleName, setNewBubbleName] = useState('')
+  const [showCreateBubble, setShowCreateBubble] = useState(false)
+  const [createBubbleLoading, setCreateBubbleLoading] = useState(false)
+
+  useEffect(() => {
+    api.bubbles.mine()
+      .then(setBubbles)
+      .catch(() => {})
+      .finally(() => setBubblesLoading(false))
+  }, [])
+
+  async function handleLeaveBubble(bubble) {
+    if (!confirm(`Quitter la bulle "${bubble.name}" ?`)) return
+    try {
+      await api.bubbles.leave(bubble.id)
+      setBubbles(bs => bs.filter(b => b.id !== bubble.id))
+      if (selectedBubble?.id === bubble.id) setSelectedBubble(null)
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  async function handleInvite(e) {
+    e.preventDefault()
+    if (!inviteEmail.trim() || !selectedBubble) return
+    setInviteStatus('sending')
+    setInviteError('')
+    try {
+      await api.bubbles.invite(selectedBubble.id, inviteEmail.trim())
+      setInviteStatus('sent')
+      setInviteEmail('')
+    } catch (err) {
+      setInviteStatus('error')
+      setInviteError(err.message)
+    }
+  }
+
+  async function handleCreateBubble(e) {
+    e.preventDefault()
+    if (!newBubbleName.trim()) return
+    setCreateBubbleLoading(true)
+    try {
+      const bubble = await api.bubbles.create(newBubbleName.trim())
+      setBubbles(bs => [...bs, bubble])
+      setNewBubbleName('')
+      setShowCreateBubble(false)
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setCreateBubbleLoading(false)
+    }
+  }
 
   // Charger et marquer comme lues
   useEffect(() => {
@@ -65,6 +124,87 @@ export default function Profile() {
     <div className="auth-page profile-page">
       <div className="auth-box profile-box">
         <h1>Mon profil</h1>
+
+        {/* Bulles */}
+        <section className="bubbles-section">
+          <h2 className="bubbles-title">Mes bulles</h2>
+
+          {bubblesLoading ? (
+            <p className="bubbles-empty">Chargement…</p>
+          ) : bubbles.length === 0 ? (
+            <p className="bubbles-empty">Vous n'appartenez à aucune bulle pour l'instant.</p>
+          ) : (
+            <div className="bubbles-list">
+              {bubbles.map(b => (
+                <div key={b.id} className="bubble-item-wrap">
+                  <button
+                    className={`bubble-pill${selectedBubble?.id === b.id ? ' active' : ''}`}
+                    onClick={() => setSelectedBubble(selectedBubble?.id === b.id ? null : b)}
+                  >
+                    🫧 {b.name}
+                    <span className="bubble-count">{b.memberCount} membre{b.memberCount > 1 ? 's' : ''}</span>
+                  </button>
+
+                  {selectedBubble?.id === b.id && (
+                    <div className="bubble-panel">
+                      {/* Inviter */}
+                      <form className="bubble-invite-form" onSubmit={handleInvite}>
+                        <input
+                          type="email"
+                          placeholder="Email de l'ami à inviter…"
+                          value={inviteEmail}
+                          onChange={e => { setInviteEmail(e.target.value); setInviteStatus('') }}
+                          required
+                        />
+                        <button type="submit" className="btn" disabled={inviteStatus === 'sending'}>
+                          {inviteStatus === 'sending' ? 'Envoi…' : 'Inviter un ami'}
+                        </button>
+                      </form>
+                      {inviteStatus === 'sent' && <p className="bubble-invite-ok">Invitation envoyée !</p>}
+                      {inviteStatus === 'error' && <p className="bubble-invite-err">{inviteError}</p>}
+
+                      {/* Quitter */}
+                      <button
+                        className="bubble-leave-btn"
+                        onClick={() => handleLeaveBubble(b)}
+                      >
+                        Quitter cette bulle
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Créer une bulle */}
+          {!showCreateBubble ? (
+            <button className="btn-ghost bubble-create-toggle" onClick={() => setShowCreateBubble(true)}>
+              + Créer votre propre bulle
+            </button>
+          ) : (
+            <form className="bubble-create-form" onSubmit={handleCreateBubble}>
+              <input
+                autoFocus
+                placeholder="Nom de la bulle…"
+                value={newBubbleName}
+                onChange={e => setNewBubbleName(e.target.value)}
+                required
+                minLength={2}
+              />
+              <div className="bubble-create-actions">
+                <button type="submit" className="btn" disabled={createBubbleLoading}>
+                  {createBubbleLoading ? 'Création…' : 'Créer'}
+                </button>
+                <button type="button" className="btn-ghost" onClick={() => { setShowCreateBubble(false); setNewBubbleName('') }}>
+                  Annuler
+                </button>
+              </div>
+            </form>
+          )}
+        </section>
+
+        <hr className="profile-divider" />
 
         {/* Notifications */}
         <section className="notifs-section">

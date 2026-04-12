@@ -83,4 +83,11 @@ export const api = {
     markRead: () => request('/notifications/read', { method: 'POST' }),
   },
   linkPreview: (url) => request(`/link-preview?url=${encodeURIComponent(url)}`),
+  bubbles: {
+    mine: () => request('/bubbles/mine'),
+    create: (name) => request('/bubbles', { method: 'POST', body: JSON.stringify({ name }) }),
+    invite: (id, email) => request(`/bubbles/${id}/invite`, { method: 'POST', body: JSON.stringify({ email }) }),
+    leave: (id) => request(`/bubbles/${id}/leave`, { method: 'DELETE' }),
+    join: (token) => request(`/bubbles/join/${token}`),
+  },
 }
