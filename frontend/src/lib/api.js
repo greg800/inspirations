@@ -56,6 +56,7 @@ export const api = {
     approve: (id) => request(`/admin/users/${id}/approve`, { method: 'PATCH' }),
     revoke: (id) => request(`/admin/users/${id}/revoke`, { method: 'PATCH' }),
     deleteUser: (id) => request(`/admin/users/${id}`, { method: 'DELETE' }),
+    seedCastelGreg: () => request('/admin/seed-castelgreg', { method: 'POST' }),
   },
   contributors: {
     list: () => request('/content/contributors'),
