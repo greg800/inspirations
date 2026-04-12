@@ -137,8 +137,52 @@
 .detail-shared {
   font-size: 13px;
   color: var(--color-text-secondary);
-  margin-bottom: 20px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
+
+.detail-bubble-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
+.detail-bubble-change {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.detail-bubble-change-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.detail-bubble-select {
+  font-size: 13px;
+  font-family: inherit;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  outline: none;
+}
+.detail-bubble-select:focus { border-color: var(--color-accent); }
+.detail-bubble-select:disabled { opacity: 0.6; cursor: wait; }
 
 .detail-ratings {
   display: flex;

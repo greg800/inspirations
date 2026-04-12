@@ -45,6 +45,7 @@ export const api = {
       body: formData,
     }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error); return d }),
     delete: (id) => request(`/content/${id}`, { method: 'DELETE' }),
+    updateBubble: (id, bubbleId) => request(`/content/${id}/bubble`, { method: 'PATCH', body: JSON.stringify({ bubbleId }) }),
   },
   reviews: {
     list: (contentId) => request(`/content/${contentId}/reviews`),

@@ -70,6 +70,8 @@ export default function Detail() {
   const [votesData, setVotesData] = useState({ up: 0, down: 0, upVoters: [], downVoters: [], myVote: null })
   const [voteLoading, setVoteLoading] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
+  const [userBubbles, setUserBubbles] = useState([])
+  const [bubbleChanging, setBubbleChanging] = useState(false)
 
   function handleShare() {
     const url = `https://inspirations.top/content/${id}`
@@ -88,6 +90,12 @@ export default function Detail() {
     api.reviews.list(id).then(setReviewsData)
     api.votes.get(id).then(setVotesData).catch(() => {})
   }, [id])
+
+  useEffect(() => {
+    if (user?.isApproved) {
+      api.bubbles.mine().then(setUserBubbles).catch(() => {})
+    }
+  }, [user?.id])
 
   async function handleVote(type) {
     if (!user || voteLoading) return
@@ -276,7 +284,39 @@ export default function Detail() {
             </div>
             <h1 className="detail-title">{content.title}</h1>
             <p className="detail-author">{content.author}</p>
-            <div className="detail-shared">Partagé par <strong>{content.sponsor}</strong></div>
+            <div className="detail-shared">
+              Partagé par <strong>{content.sponsor}</strong>
+              {content.bubble && (
+                <span className="detail-bubble-badge">🫧 {content.bubble.name}</span>
+              )}
+            </div>
+            {canEdit && userBubbles.length > 1 && (
+              <div className="detail-bubble-change">
+                <label className="detail-bubble-change-label">Changer de bulle :</label>
+                <select
+                  value={content.bubble?.id || ''}
+                  disabled={bubbleChanging}
+                  onChange={async e => {
+                    const newBubbleId = parseInt(e.target.value)
+                    if (!newBubbleId || newBubbleId === content.bubble?.id) return
+                    setBubbleChanging(true)
+                    try {
+                      const result = await api.content.updateBubble(id, newBubbleId)
+                      setContent(c => ({ ...c, bubble: { id: result.bubbleId, name: result.bubbleName } }))
+                    } catch (err) {
+                      alert(err.message)
+                    } finally {
+                      setBubbleChanging(false)
+                    }
+                  }}
+                  className="detail-bubble-select"
+                >
+                  {userBubbles.map(b => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="detail-ratings">
               <div className="detail-rating-item">
                 <span className="detail-rating-label">Note du sponsor</span>
