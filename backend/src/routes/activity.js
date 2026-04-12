@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
+import { optionalAuth } from '../middleware/auth.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -10,14 +11,31 @@ function getCutoff(period) {
   return null
 }
 
+// Récupère les IDs de bulles de l'utilisateur, ou null si non connecté
+async function getUserBubbleIds(userId) {
+  if (!userId) return null
+  const memberships = await prisma.bubbleMembership.findMany({
+    where: { userId },
+    select: { bubbleId: true },
+  })
+  return memberships.map(m => m.bubbleId)
+}
+
 // GET /api/activity?period=1d|7d|all&view=works|contributors
-router.get('/', async (req, res) => {
+router.get('/', optionalAuth, async (req, res) => {
   const { period = 'all', view = 'works' } = req.query
   const cutoff = getCutoff(period)
   const dateFilter = cutoff ? { gte: cutoff } : undefined
 
+  // Filtre par bulles de l'utilisateur connecté
+  const bubbleIds = await getUserBubbleIds(req.user?.id)
+  if (bubbleIds !== null && bubbleIds.length === 0) return res.json([])
+
+  const bubbleWhere = bubbleIds ? { bubbleId: { in: bubbleIds } } : {}
+
   if (view === 'works') {
     const contents = await prisma.content.findMany({
+      where: bubbleWhere,
       select: {
         id: true,
         title: true,
@@ -53,17 +71,33 @@ router.get('/', async (req, res) => {
   }
 
   if (view === 'contributors') {
+    // Récupérer les IDs de contenus accessibles à l'utilisateur
+    const accessibleContents = await prisma.content.findMany({
+      where: bubbleWhere,
+      select: { id: true },
+    })
+    const contentIds = accessibleContents.map(c => c.id)
+
     const [contents, reviews, votes] = await Promise.all([
       prisma.content.findMany({
-        where: dateFilter ? { createdAt: dateFilter } : {},
+        where: {
+          ...bubbleWhere,
+          ...(dateFilter ? { createdAt: dateFilter } : {}),
+        },
         select: { userId: true, user: { select: { name: true } } },
       }),
       prisma.review.findMany({
-        where: dateFilter ? { createdAt: dateFilter } : {},
+        where: {
+          contentId: { in: contentIds },
+          ...(dateFilter ? { createdAt: dateFilter } : {}),
+        },
         select: { userId: true, user: { select: { name: true } } },
       }),
       prisma.vote.findMany({
-        where: dateFilter ? { createdAt: dateFilter } : {},
+        where: {
+          contentId: { in: contentIds },
+          ...(dateFilter ? { createdAt: dateFilter } : {}),
+        },
         select: { userId: true, user: { select: { name: true } } },
       }),
     ])
