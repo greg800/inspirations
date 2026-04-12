@@ -12,27 +12,11 @@ export default function Admin() {
   const [tags, setTags] = useState([])
   const [newSupport, setNewSupport] = useState('')
   const [newGenre, setNewGenre] = useState('')
-  const [seedStatus, setSeedStatus] = useState('') // '' | 'running' | 'done' | 'error'
-  const [seedMsg, setSeedMsg] = useState('')
-
   useEffect(() => {
     if (!user?.isAdmin) { navigate('/'); return }
     api.admin.users().then(setUsers).finally(() => setLoading(false))
     api.tags.list().then(setTags)
   }, [])
-
-  async function runSeed() {
-    setSeedStatus('running')
-    setSeedMsg('')
-    try {
-      const res = await api.admin.seedCastelGreg()
-      setSeedStatus('done')
-      setSeedMsg(res.message || 'Synchronisation terminée')
-    } catch (err) {
-      setSeedStatus('error')
-      setSeedMsg(err.message)
-    }
-  }
 
   const supports = tags.filter(t => t.type === 'support')
   const genres = tags.filter(t => t.type === 'genre')
@@ -67,20 +51,6 @@ export default function Admin() {
           <p className="admin-loading">Chargement…</p>
         ) : (
           <>
-            <section className="admin-section">
-              <h2>Bulles</h2>
-              <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 12 }}>
-                Ajoute tous les utilisateurs existants à la bulle CastelGreg et rattache tout le contenu orphelin.
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <button className="btn" onClick={runSeed} disabled={seedStatus === 'running'}>
-                  {seedStatus === 'running' ? 'Synchronisation…' : '🫧 Synchroniser CastelGreg'}
-                </button>
-                {seedStatus === 'done' && <span style={{ fontSize: 13, color: '#2e7d32' }}>✓ {seedMsg}</span>}
-                {seedStatus === 'error' && <span style={{ fontSize: 13, color: '#c62828' }}>✗ {seedMsg}</span>}
-              </div>
-            </section>
-
             <section className="admin-section">
               <h2>Comptes membres</h2>
               {users.length === 0 ? (

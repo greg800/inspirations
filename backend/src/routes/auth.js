@@ -57,7 +57,7 @@ router.post('/register', async (req, res) => {
     `,
   }).catch(() => {}) // ne pas bloquer la réponse si l'email échoue
 
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin, isApproved: user.isApproved, zoomLevel: user.zoomLevel } })
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin, isApproved: user.isApproved, zoomLevel: user.zoomLevel, defaultBubbleId: user.defaultBubbleId ?? null } })
 })
 
 router.post('/login', async (req, res) => {
@@ -79,7 +79,7 @@ router.post('/login', async (req, res) => {
     SECRET,
     { expiresIn: '7d' }
   )
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin, isApproved: user.isApproved, zoomLevel: user.zoomLevel } })
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin, isApproved: user.isApproved, zoomLevel: user.zoomLevel, defaultBubbleId: user.defaultBubbleId ?? null } })
 })
 
 router.post('/forgot-password', async (req, res) => {

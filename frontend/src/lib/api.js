@@ -78,6 +78,7 @@ export const api = {
   },
   users: {
     updatePreferences: (data) => request('/users/me', { method: 'PATCH', body: JSON.stringify(data) }),
+    setDefaultBubble: (bubbleId) => request('/users/me/default-bubble', { method: 'PATCH', body: JSON.stringify({ bubbleId }) }),
   },
   notifications: {
     get:      () => request('/notifications'),

@@ -26,4 +26,22 @@ router.patch('/me', requireAuth, async (req, res) => {
   res.json(user)
 })
 
+// PATCH /api/users/me/default-bubble — définir la bulle par défaut
+router.patch('/me/default-bubble', requireAuth, async (req, res) => {
+  const { bubbleId } = req.body
+  if (!bubbleId) return res.status(400).json({ error: 'bubbleId requis' })
+
+  // Vérifier que l'utilisateur est bien membre de cette bulle
+  const membership = await prisma.bubbleMembership.findUnique({
+    where: { userId_bubbleId: { userId: req.user.id, bubbleId: parseInt(bubbleId) } },
+  })
+  if (!membership) return res.status(403).json({ error: 'Vous n\'êtes pas membre de cette bulle' })
+
+  await prisma.user.update({
+    where: { id: req.user.id },
+    data: { defaultBubbleId: parseInt(bubbleId) },
+  })
+  res.json({ defaultBubbleId: parseInt(bubbleId) })
+})
+
 export default router

@@ -29,9 +29,12 @@ export default function ContentForm({ editing }) {
     api.tags.list('genre').then(ts => setGenres(ts.map(t => t.value)))
     api.bubbles.mine().then(bs => {
       setBubbles(bs)
-      // Pré-sélectionner si une seule bulle
-      if (bs.length === 1 && !editing) {
-        setForm(f => ({ ...f, bubbleId: String(bs[0].id) }))
+      if (!editing && bs.length > 0) {
+        // Pré-sélectionner la bulle par défaut, sinon la première
+        const stored = JSON.parse(localStorage.getItem('user') || '{}')
+        const defaultId = stored.defaultBubbleId
+        const preselect = (defaultId && bs.find(b => b.id === defaultId)) ? defaultId : bs[0].id
+        setForm(f => ({ ...f, bubbleId: String(preselect) }))
       }
     }).catch(() => {})
     if (editing && id) {

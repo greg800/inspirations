@@ -51,6 +51,15 @@ export default function Profile() {
     }
   }
 
+  async function handleSetDefault(bubble) {
+    try {
+      await api.users.setDefaultBubble(bubble.id)
+      updateUser({ defaultBubbleId: bubble.id })
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
   async function handleInvite(e) {
     e.preventDefault()
     if (!inviteEmail.trim() || !selectedBubble) return
@@ -135,18 +144,31 @@ export default function Profile() {
             <p className="bubbles-empty">Vous n'appartenez à aucune bulle pour l'instant.</p>
           ) : (
             <div className="bubbles-list">
-              {bubbles.map(b => (
+              {bubbles.map(b => {
+                const isDefault = user?.defaultBubbleId === b.id
+                return (
                 <div key={b.id} className="bubble-item-wrap">
                   <button
                     className={`bubble-pill${selectedBubble?.id === b.id ? ' active' : ''}`}
-                    onClick={() => setSelectedBubble(selectedBubble?.id === b.id ? null : b)}
+                    onClick={() => { setSelectedBubble(selectedBubble?.id === b.id ? null : b); setInviteStatus(''); setInviteEmail('') }}
                   >
                     🫧 {b.name}
+                    {isDefault && <span className="bubble-default-star" title="Bulle par défaut">★</span>}
                     <span className="bubble-count">{b.memberCount} membre{b.memberCount > 1 ? 's' : ''}</span>
                   </button>
 
                   {selectedBubble?.id === b.id && (
                     <div className="bubble-panel">
+                      {/* Bulle par défaut */}
+                      {!isDefault && (
+                        <button className="bubble-setdefault-btn" onClick={() => handleSetDefault(b)}>
+                          ★ Définir cette bulle par défaut
+                        </button>
+                      )}
+                      {isDefault && (
+                        <p className="bubble-is-default">★ Bulle par défaut pour vos publications</p>
+                      )}
+
                       {/* Inviter */}
                       <form className="bubble-invite-form" onSubmit={handleInvite}>
                         <input
@@ -157,23 +179,21 @@ export default function Profile() {
                           required
                         />
                         <button type="submit" className="btn" disabled={inviteStatus === 'sending'}>
-                          {inviteStatus === 'sending' ? 'Envoi…' : 'Inviter un ami'}
+                          {inviteStatus === 'sending' ? 'Ajout…' : 'Inviter un ami'}
                         </button>
                       </form>
-                      {inviteStatus === 'sent' && <p className="bubble-invite-ok">Invitation envoyée !</p>}
+                      {inviteStatus === 'sent' && <p className="bubble-invite-ok">Ami ajouté à la bulle !</p>}
                       {inviteStatus === 'error' && <p className="bubble-invite-err">{inviteError}</p>}
 
                       {/* Quitter */}
-                      <button
-                        className="bubble-leave-btn"
-                        onClick={() => handleLeaveBubble(b)}
-                      >
+                      <button className="bubble-leave-btn" onClick={() => handleLeaveBubble(b)}>
                         Quitter cette bulle
                       </button>
                     </div>
                   )}
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
 

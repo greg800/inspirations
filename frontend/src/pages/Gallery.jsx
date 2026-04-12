@@ -242,6 +242,11 @@ export default function Gallery() {
 
         {loading ? (
           <div className="gallery-loading">Chargement…</div>
+        ) : !loading && user && allContents.length === 0 && !filters.support && !filters.genre && !filters.minRating && !filters.contributor && !search ? (
+          <div className="gallery-no-bubble">
+            <p>Vous devez être invité à au moins une bulle de partage pour voir ici les expériences à partager.</p>
+            <p className="gallery-no-bubble-hint">Demandez une invitation à un membre.</p>
+          </div>
         ) : allContents.length === 0 ? (
           <div className="gallery-empty">Aucun résultat pour ces filtres.</div>
         ) : (
