@@ -290,7 +290,7 @@ export default function Detail() {
                 <span className="detail-bubble-badge">🫧 {content.bubble.name}</span>
               )}
             </div>
-            {canEdit && userBubbles.length > 1 && (
+            {isAuthor && userBubbles.length > 1 && (
               <div className="detail-bubble-change">
                 <label className="detail-bubble-change-label">Changer de bulle :</label>
                 <select

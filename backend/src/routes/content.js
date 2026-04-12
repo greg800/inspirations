@@ -161,10 +161,52 @@ router.get('/', optionalAuth, async (req, res) => {
 router.get('/:id', async (req, res) => {
   const content = await prisma.content.findUnique({
     where: { id: parseInt(req.params.id) },
-    include: { user: { select: { name: true } } },
+    include: {
+      user: { select: { name: true } },
+      bubble: { select: { id: true, name: true } },
+    },
   })
   if (!content) return res.status(404).json({ error: 'Non trouvé' })
   res.json(content)
+})
+
+// PATCH /:id/bubble — changer la bulle d'un contenu (auteur uniquement)
+router.patch('/:id/bubble', requireApproved, async (req, res) => {
+  const contentId = parseInt(req.params.id)
+  const newBubbleId = parseInt(req.body.bubbleId)
+  if (!newBubbleId) return res.status(400).json({ error: 'bubbleId requis' })
+
+  const content = await prisma.content.findUnique({ where: { id: contentId } })
+  if (!content) return res.status(404).json({ error: 'Non trouvé' })
+  // Seul le créateur peut changer de bulle
+  if (content.userId !== req.user.id) {
+    return res.status(403).json({ error: 'Seul le créateur peut changer la bulle' })
+  }
+
+  // Vérifier que le créateur est membre de la bulle cible
+  const membership = await prisma.bubbleMembership.findUnique({
+    where: { userId_bubbleId: { userId: req.user.id, bubbleId: newBubbleId } },
+  })
+  if (!membership) return res.status(403).json({ error: 'Vous n\'êtes pas membre de cette bulle' })
+
+  // Récupérer les membres de la nouvelle bulle
+  const newBubbleMembers = await prisma.bubbleMembership.findMany({
+    where: { bubbleId: newBubbleId },
+    select: { userId: true },
+  })
+  const memberIds = new Set(newBubbleMembers.map(m => m.userId))
+
+  // Supprimer les reviews et votes des utilisateurs non-membres de la nouvelle bulle
+  await prisma.review.deleteMany({
+    where: { contentId, userId: { notIn: [...memberIds] } },
+  })
+  await prisma.vote.deleteMany({
+    where: { contentId, userId: { notIn: [...memberIds] } },
+  })
+
+  const bubble = await prisma.bubble.findUnique({ where: { id: newBubbleId } })
+  await prisma.content.update({ where: { id: contentId }, data: { bubbleId: newBubbleId } })
+  res.json({ bubbleId: newBubbleId, bubbleName: bubble.name })
 })
 
 // POST create content (auth + approved)
