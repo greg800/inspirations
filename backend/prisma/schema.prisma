@@ -42,9 +42,9 @@ model PasswordResetToken {
 model Content {
   id          Int       @id @default(autoincrement())
   title       String
-  author      String
+  author      String?
   coverImage  String
-  summary     String
+  summary     String?
   whyRead     String
   rating      Float
   sponsor     String
