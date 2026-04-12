@@ -68,7 +68,10 @@ router.get('/', optionalAuth, async (req, res) => {
     // Membre d'aucune bulle → rien à montrer
     return res.json({ items: [], total: 0, page: pageNum, hasMore: false })
   }
-  // Si non connecté : pas de filtre bulle (comportement legacy, sera géré par auth en frontend)
+  // Si non connecté → rien à montrer
+  else if (bubbleIds === null) {
+    return res.json({ items: [], total: 0, page: pageNum, hasMore: false })
+  }
 
   if (support) where.support = support
   if (genre) where.genre = genre

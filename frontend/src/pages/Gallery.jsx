@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { useAuth } from '../lib/auth.jsx'
 import { useGalleryFilter } from '../lib/galleryFilter.jsx'
@@ -242,7 +243,15 @@ export default function Gallery() {
 
         {loading ? (
           <div className="gallery-loading">Chargement…</div>
-        ) : !loading && user && allContents.length === 0 && !filters.support && !filters.genre && !filters.minRating && !filters.contributor && !search ? (
+        ) : !user ? (
+          <div className="gallery-no-bubble">
+            <p>Connectez-vous pour découvrir les inspirations partagées dans votre bulle.</p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
+              <Link to="/login" className="btn">Se connecter</Link>
+              <Link to="/register" className="btn-ghost">Créer un compte</Link>
+            </div>
+          </div>
+        ) : !loading && allContents.length === 0 && !filters.support && !filters.genre && !filters.minRating && !filters.contributor && !search ? (
           <div className="gallery-no-bubble">
             <p>Vous devez être invité à au moins une bulle de partage pour voir ici les expériences à partager.</p>
             <p className="gallery-no-bubble-hint">Demandez une invitation à un membre.</p>
