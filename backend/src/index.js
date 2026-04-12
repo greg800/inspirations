@@ -66,12 +66,16 @@ async function seedCastelGreg() {
       console.log('✅ Bulle CastelGreg créée')
     }
 
-    // Ajouter TOUS les utilisateurs comme membres (skipDuplicates = idempotent)
+    // Ajouter tous les utilisateurs non encore membres
     const users = await prisma.user.findMany()
-    await prisma.bubbleMembership.createMany({
-      data: users.map(u => ({ userId: u.id, bubbleId: bubble.id })),
-      skipDuplicates: true,
+    const existing = await prisma.bubbleMembership.findMany({
+      where: { bubbleId: bubble.id },
+      select: { userId: true },
     })
+    const existingIds = new Set(existing.map(m => m.userId))
+    for (const u of users.filter(u => !existingIds.has(u.id))) {
+      await prisma.bubbleMembership.create({ data: { userId: u.id, bubbleId: bubble.id } })
+    }
 
     // Rattacher tout le contenu orphelin à CastelGreg
     await prisma.content.updateMany({ where: { bubbleId: null }, data: { bubbleId: bubble.id } })

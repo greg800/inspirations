@@ -82,14 +82,20 @@ router.post('/seed-castelgreg', requireAdmin, async (req, res) => {
     }
 
     const users = await prisma.user.findMany()
-    await prisma.bubbleMembership.createMany({
-      data: users.map(u => ({ userId: u.id, bubbleId: bubble.id })),
-      skipDuplicates: true,
+    const existing = await prisma.bubbleMembership.findMany({
+      where: { bubbleId: bubble.id },
+      select: { userId: true },
     })
+    const existingIds = new Set(existing.map(m => m.userId))
+    const toAdd = users.filter(u => !existingIds.has(u.id))
+
+    for (const u of toAdd) {
+      await prisma.bubbleMembership.create({ data: { userId: u.id, bubbleId: bubble.id } })
+    }
 
     await prisma.content.updateMany({ where: { bubbleId: null }, data: { bubbleId: bubble.id } })
 
-    res.json({ message: `CastelGreg synchronisée — ${users.length} membres, contenus rattachés` })
+    res.json({ message: `CastelGreg synchronisée — ${toAdd.length} membres ajoutés, contenus rattachés` })
   } catch (err) {
     console.error('Seed CastelGreg error:', err)
     res.status(500).json({ error: err.message })
