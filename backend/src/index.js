@@ -49,47 +49,6 @@ if (isProd) {
   })
 }
 
-// Seed idempotent : créer la bulle CastelGreg et y rattacher TOUS les membres + contenus
-// Safe à chaque redémarrage — ne duplique jamais grâce aux skipDuplicates / upsert
-async function seedCastelGreg() {
-  const prisma = new PrismaClient()
-  try {
-    // Trouver ou créer la bulle
-    let bubble = await prisma.bubble.findFirst({ where: { name: 'CastelGreg' } })
-
-    if (!bubble) {
-      const firstUser = await prisma.user.findFirst({ orderBy: { id: 'asc' } })
-      if (!firstUser) { console.log('Seed CastelGreg : aucun utilisateur trouvé, skip.'); return }
-      bubble = await prisma.bubble.create({
-        data: { name: 'CastelGreg', createdById: firstUser.id },
-      })
-      console.log('✅ Bulle CastelGreg créée')
-    }
-
-    // Ajouter tous les utilisateurs non encore membres
-    const users = await prisma.user.findMany()
-    const existing = await prisma.bubbleMembership.findMany({
-      where: { bubbleId: bubble.id },
-      select: { userId: true },
-    })
-    const existingIds = new Set(existing.map(m => m.userId))
-    for (const u of users.filter(u => !existingIds.has(u.id))) {
-      await prisma.bubbleMembership.create({ data: { userId: u.id, bubbleId: bubble.id } })
-    }
-
-    // Rattacher tout le contenu orphelin à CastelGreg
-    await prisma.content.updateMany({ where: { bubbleId: null }, data: { bubbleId: bubble.id } })
-
-    console.log(`✅ Bulle CastelGreg : ${users.length} membres, contenus orphelins rattachés`)
-  } catch (err) {
-    console.error('Erreur seed CastelGreg:', err)
-  } finally {
-    await prisma.$disconnect()
-  }
-}
-
-
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
   console.log(`Backend : http://localhost:${PORT}`)
-  await seedCastelGreg()
 })
