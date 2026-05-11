@@ -71,7 +71,13 @@ export default function Detail() {
   const [voteLoading, setVoteLoading] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [userBubbles, setUserBubbles] = useState([])
-  const [bubbleChanging, setBubbleChanging] = useState(false)
+  // Multi-bulle
+  const [selectedBubbles, setSelectedBubbles] = useState([])
+  const [bubblesDirty, setBubblesDirty] = useState(false)
+  const [bubblesUpdating, setBubblesUpdating] = useState(false)
+  // Suppression par bulle
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteBubbles, setDeleteBubbles] = useState([])
 
   function handleShare() {
     const url = `https://inspirations.top/content/${id}`
@@ -83,6 +89,7 @@ export default function Detail() {
     api.content.get(id)
       .then(c => {
         setContent(c)
+        setSelectedBubbles((c.bubbles || []).map(b => b.id))
         if (c.url) api.linkPreview(c.url).then(setLinkPreview).catch(() => {})
       })
       .catch(() => navigate('/'))
@@ -127,9 +134,62 @@ export default function Detail() {
   }
 
   async function handleDelete() {
+    const bubbles = content?.bubbles || []
+    const isAuthorLocal = user && content && user.id === content.userId
+    if (isAuthorLocal && !user.isAdmin && bubbles.length > 1) {
+      setDeleteBubbles(bubbles.map(b => b.id))
+      setShowDeleteModal(true)
+      return
+    }
     if (!confirm('Supprimer cette publication ?')) return
     await api.content.delete(id)
     navigate('/')
+  }
+
+  async function handleDeleteFromBubbles() {
+    if (deleteBubbles.length === 0) return
+    try {
+      for (const bubbleId of deleteBubbles) {
+        const result = await api.content.removeFromBubble(id, bubbleId)
+        if (result.deleted) {
+          navigate('/')
+          return
+        }
+      }
+      const updated = await api.content.get(id)
+      setContent(updated)
+      setSelectedBubbles((updated.bubbles || []).map(b => b.id))
+      setBubblesDirty(false)
+      setShowDeleteModal(false)
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  async function handleSaveBubbles() {
+    if (selectedBubbles.length === 0) return
+    setBubblesUpdating(true)
+    try {
+      const currentIds = (content.bubbles || []).map(b => b.id)
+      const toAdd = selectedBubbles.filter(id => !currentIds.includes(id))
+      const toRemove = currentIds.filter(id => !selectedBubbles.includes(id))
+
+      for (const bubbleId of toAdd) {
+        await api.content.addBubble(id, bubbleId)
+      }
+      for (const bubbleId of toRemove) {
+        await api.content.removeFromBubble(id, bubbleId)
+      }
+
+      const updated = await api.content.get(id)
+      setContent(updated)
+      setSelectedBubbles((updated.bubbles || []).map(b => b.id))
+      setBubblesDirty(false)
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setBubblesUpdating(false)
+    }
   }
 
   async function handleReviewSubmit(e) {
@@ -182,25 +242,22 @@ export default function Detail() {
     setReviewsData(await api.reviews.list(id))
   }
 
-  // Sticky bar actions selon contexte + état du formulaire
+  // Sticky bar actions
   useEffect(() => {
     if (!content) return
     const isAuthor = user && user.id === content.userId
     const canEdit = user && (isAuthor || user.isAdmin)
-    // Un admin non-auteur peut laisser un avis
     const canReview = user && user.isApproved && !isAuthor
     const formFilled = !!(reviewForm.rating || reviewForm.comment.trim())
 
     if (!user) {
       setActions([{ label: 'Créer un compte', to: '/register' }])
     } else if (canEdit && !formFilled) {
-      // Modifier / Supprimer tant que le formulaire d'avis est vierge
       setActions([
         { label: 'Modifier', to: `/edit/${content.id}` },
         { label: 'Supprimer', onClick: handleDelete, ghost: true },
       ])
     } else if (canReview) {
-      // Dès qu'une note ou un commentaire est saisi → "Publier mon avis"
       setActions([{
         label: formFilled ? 'Enregistrer mon avis' : 'Publier mon avis',
         onClick: formFilled
@@ -211,7 +268,7 @@ export default function Detail() {
       setActions(null)
     }
     return () => setActions(null)
-  }, [content?.id, user?.id, user?.isAdmin, reviewForm.rating, reviewForm.comment])
+  }, [content?.id, content?.bubbles?.length, user?.id, user?.isAdmin, reviewForm.rating, reviewForm.comment])
 
   if (loading) return <div className="detail-loading container">Chargement…</div>
   if (!content) return null
@@ -220,6 +277,7 @@ export default function Detail() {
   const isAuthor = user && user.id === content.userId
   const canReview = user && user.isApproved && !isAuthor
   const myReview = user ? reviewsData.reviews.find(r => r.userId === user.id) : null
+  const contentBubbles = content.bubbles || []
 
   return (
     <div className="detail-page">
@@ -249,7 +307,6 @@ export default function Detail() {
                 <img src={content.coverImage} alt={content.title} />
               )}
             </div>
-            {/* Link preview — desktop only (hidden on mobile via CSS) */}
             {content.url && (
               <a href={content.url} target="_blank" rel="noopener noreferrer" className="link-preview link-preview-desktop">
                 {linkPreview?.image && (
@@ -264,7 +321,6 @@ export default function Detail() {
                 <span className="link-preview-arrow">↗</span>
               </a>
             )}
-            {/* Edit actions desktop only */}
             {canEdit && (
               <div className="detail-edit-actions">
                 <Link to={`/edit/${content.id}`} className="btn" style={{ width: '100%', justifyContent: 'center' }}>Modifier</Link>
@@ -286,37 +342,59 @@ export default function Detail() {
             <p className="detail-author">{content.author}</p>
             <div className="detail-shared">
               Partagé par <strong>{content.sponsor}</strong>
-              {content.bubble && userBubbles.length > 1 && (
-                <span className="detail-bubble-badge">🫧 {content.bubble.name}</span>
+              {contentBubbles.length > 0 && userBubbles.length > 1 && (
+                <span className="detail-bubble-badge">🫧 {contentBubbles.map(b => b.name).join(', ')}</span>
               )}
             </div>
-            {isAuthor && userBubbles.length > 1 && (
+
+            {/* Sélection multi-bulle (auteur uniquement) */}
+            {isAuthor && userBubbles.length > 0 && (
               <div className="detail-bubble-change">
-                <label className="detail-bubble-change-label">Changer de bulle :</label>
-                <select
-                  value={content.bubble?.id || ''}
-                  disabled={bubbleChanging}
-                  onChange={async e => {
-                    const newBubbleId = parseInt(e.target.value)
-                    if (!newBubbleId || newBubbleId === content.bubble?.id) return
-                    setBubbleChanging(true)
-                    try {
-                      const result = await api.content.updateBubble(id, newBubbleId)
-                      setContent(c => ({ ...c, bubble: { id: result.bubbleId, name: result.bubbleName } }))
-                    } catch (err) {
-                      alert(err.message)
-                    } finally {
-                      setBubbleChanging(false)
-                    }
-                  }}
-                  className="detail-bubble-select"
-                >
+                <label className="detail-bubble-change-label">Bulles :</label>
+                <div className="bubble-checkbox-list">
                   {userBubbles.map(b => (
-                    <option key={b.id} value={b.id}>{b.name}</option>
+                    <label key={b.id} className="bubble-checkbox-item">
+                      <input
+                        type="checkbox"
+                        checked={selectedBubbles.includes(b.id)}
+                        onChange={e => {
+                          setSelectedBubbles(prev =>
+                            e.target.checked ? [...prev, b.id] : prev.filter(x => x !== b.id)
+                          )
+                          setBubblesDirty(true)
+                        }}
+                      />
+                      {b.name}
+                    </label>
                   ))}
-                </select>
+                </div>
+                {bubblesDirty && (
+                  <div className="bubble-save-row">
+                    {selectedBubbles.length === 0 && (
+                      <p className="msg-error">Sélectionnez au moins une bulle</p>
+                    )}
+                    <button
+                      className="btn btn-sm"
+                      onClick={handleSaveBubbles}
+                      disabled={bubblesUpdating || selectedBubbles.length === 0}
+                    >
+                      {bubblesUpdating ? 'Enregistrement…' : 'Enregistrer'}
+                    </button>
+                    <button
+                      className="btn-ghost btn-sm"
+                      onClick={() => {
+                        setSelectedBubbles(contentBubbles.map(b => b.id))
+                        setBubblesDirty(false)
+                      }}
+                      disabled={bubblesUpdating}
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                )}
               </div>
             )}
+
             <div className="detail-ratings">
               <div className="detail-rating-item">
                 <span className="detail-rating-label">Note du sponsor</span>
@@ -336,7 +414,6 @@ export default function Detail() {
           {/* Zones 2-5 (col 2, row 2+ / full width on mobile) */}
           <div className="detail-content">
 
-            {/* Link preview — mobile only (hidden on desktop via CSS) */}
             {content.url && (
               <a href={content.url} target="_blank" rel="noopener noreferrer" className="link-preview link-preview-mobile">
                 {linkPreview?.image && (
@@ -484,11 +561,52 @@ export default function Detail() {
         </div>
       </div>
 
+      {/* Modal partage */}
       {showShareModal && (
         <div className="share-modal-overlay" onClick={() => setShowShareModal(false)}>
           <div className="share-modal" onClick={e => e.stopPropagation()}>
             <p>Le message avec le lien vers cette œuvre est bien copié dans le presse-papier, à toi de le coller dans une autre app !</p>
             <button className="btn full" onClick={() => setShowShareModal(false)}>Ok, c'est compris</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal suppression par bulle */}
+      {showDeleteModal && (
+        <div className="share-modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="share-modal" onClick={e => e.stopPropagation()}>
+            <p style={{ fontWeight: 600, marginBottom: '12px' }}>Retirer de quelles bulles ?</p>
+            <div className="bubble-checkbox-list" style={{ marginBottom: '16px' }}>
+              {contentBubbles.map(b => (
+                <label key={b.id} className="bubble-checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={deleteBubbles.includes(b.id)}
+                    onChange={e => setDeleteBubbles(prev =>
+                      e.target.checked ? [...prev, b.id] : prev.filter(x => x !== b.id)
+                    )}
+                  />
+                  {b.name}
+                </label>
+              ))}
+            </div>
+            {deleteBubbles.length === contentBubbles.length && deleteBubbles.length > 0 && (
+              <p className="msg-error" style={{ marginBottom: '12px' }}>
+                La publication sera définitivement supprimée.
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                className="btn"
+                onClick={handleDeleteFromBubbles}
+                disabled={deleteBubbles.length === 0}
+              >
+                Confirmer
+              </button>
+              <button className="btn-ghost" onClick={() => setShowDeleteModal(false)}>
+                Annuler
+              </button>
+            </div>
           </div>
         </div>
       )}

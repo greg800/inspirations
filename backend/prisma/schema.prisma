@@ -55,7 +55,8 @@ model Content {
   userId      Int
   user        User      @relation(fields: [userId], references: [id])
   bubbleId    Int?
-  bubble      Bubble?   @relation(fields: [bubbleId], references: [id])
+  bubble      Bubble?   @relation("ContentLegacyBubble", fields: [bubbleId], references: [id])
+  bubbles     ContentBubble[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   reviews     Review[]
@@ -63,14 +64,24 @@ model Content {
 }
 
 model Bubble {
-  id          Int      @id @default(autoincrement())
-  name        String
-  createdAt   DateTime @default(now())
-  createdById Int
-  createdBy   User     @relation("BubbleCreator", fields: [createdById], references: [id])
-  members     BubbleMembership[]
-  contents    Content[]
-  invitations BubbleInvitation[]
+  id             Int                @id @default(autoincrement())
+  name           String
+  createdAt      DateTime           @default(now())
+  createdById    Int
+  createdBy      User               @relation("BubbleCreator", fields: [createdById], references: [id])
+  members        BubbleMembership[]
+  contents       Content[]          @relation("ContentLegacyBubble")
+  contentBubbles ContentBubble[]
+  invitations    BubbleInvitation[]
+}
+
+model ContentBubble {
+  id        Int     @id @default(autoincrement())
+  contentId Int
+  bubbleId  Int
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  bubble    Bubble  @relation(fields: [bubbleId], references: [id], onDelete: Cascade)
+  @@unique([contentId, bubbleId])
 }
 
 model BubbleMembership {

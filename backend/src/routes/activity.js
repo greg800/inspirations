@@ -31,7 +31,7 @@ router.get('/', optionalAuth, async (req, res) => {
   const bubbleIds = await getUserBubbleIds(req.user?.id)
   if (bubbleIds !== null && bubbleIds.length === 0) return res.json([])
 
-  const bubbleWhere = bubbleIds ? { bubbleId: { in: bubbleIds } } : {}
+  const bubbleWhere = bubbleIds ? { bubbles: { some: { bubbleId: { in: bubbleIds } } } } : {}
 
   if (view === 'works') {
     const contents = await prisma.content.findMany({

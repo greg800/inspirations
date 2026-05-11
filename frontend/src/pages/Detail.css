@@ -158,31 +158,53 @@
 
 .detail-bubble-change {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
-  flex-wrap: wrap;
 }
 
 .detail-bubble-change-label {
   font-size: 12px;
   color: var(--color-text-secondary);
-  white-space: nowrap;
 }
 
-.detail-bubble-select {
+.bubble-checkbox-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bubble-checkbox-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
-  font-family: inherit;
+  cursor: pointer;
   padding: 4px 10px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-bg);
+  border-radius: 20px;
+  background: var(--color-surface);
   color: var(--color-text);
-  cursor: pointer;
-  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
 }
-.detail-bubble-select:focus { border-color: var(--color-accent); }
-.detail-bubble-select:disabled { opacity: 0.6; cursor: wait; }
+.bubble-checkbox-item input[type="checkbox"] {
+  accent-color: var(--color-accent);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+.bubble-checkbox-item:has(input:checked) {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.bubble-save-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 .detail-ratings {
   display: flex;

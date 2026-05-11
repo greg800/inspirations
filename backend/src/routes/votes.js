@@ -5,11 +5,38 @@ import { requireAuth, optionalAuth } from '../middleware/auth.js'
 const router = Router({ mergeParams: true })
 const prisma = new PrismaClient()
 
-// GET votes pour un contenu (public, myVote si connecté)
+// GET votes pour un contenu — filtrés par bulle du viewer
 router.get('/', optionalAuth, async (req, res) => {
   const contentId = parseInt(req.params.id)
+  let where = { contentId }
+
+  if (req.user) {
+    const contentBubbles = await prisma.contentBubble.findMany({
+      where: { contentId },
+      select: { bubbleId: true },
+    })
+    const contentBubbleIds = contentBubbles.map(cb => cb.bubbleId)
+
+    if (contentBubbleIds.length > 0) {
+      const viewerMemberships = await prisma.bubbleMembership.findMany({
+        where: { userId: req.user.id, bubbleId: { in: contentBubbleIds } },
+        select: { bubbleId: true },
+      })
+      const sharedBubbleIds = viewerMemberships.map(m => m.bubbleId)
+
+      if (sharedBubbleIds.length > 0) {
+        const members = await prisma.bubbleMembership.findMany({
+          where: { bubbleId: { in: sharedBubbleIds } },
+          select: { userId: true },
+        })
+        const memberIds = [...new Set(members.map(m => m.userId))]
+        where.userId = { in: memberIds }
+      }
+    }
+  }
+
   const votes = await prisma.vote.findMany({
-    where: { contentId },
+    where,
     include: { user: { select: { name: true } } },
     orderBy: { createdAt: 'desc' },
   })

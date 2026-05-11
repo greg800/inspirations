@@ -30,7 +30,7 @@ function wordCount(text) {
   return text.trim().split(/\s+/).filter(Boolean).length
 }
 
-// GET all unique contributor names (publishers + reviewers) — filtrés par bulles de l'utilisateur
+// GET all unique contributor names — filtrés par bulles de l'utilisateur
 router.get('/contributors', optionalAuth, async (req, res) => {
   if (!req.user) return res.json([])
 
@@ -42,7 +42,7 @@ router.get('/contributors', optionalAuth, async (req, res) => {
   if (bubbleIds.length === 0) return res.json([])
 
   const contents = await prisma.content.findMany({
-    where: { bubbleId: { in: bubbleIds } },
+    where: { bubbles: { some: { bubbleId: { in: bubbleIds } } } },
     select: { id: true, user: { select: { name: true } } },
   })
   const contentIds = contents.map(c => c.id)
@@ -66,7 +66,6 @@ router.get('/', optionalAuth, async (req, res) => {
   const pageNum = Math.max(1, parseInt(page) || 1)
   const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20))
 
-  // Filtrer par bulles de l'utilisateur connecté
   let bubbleIds = null
   if (req.user?.id) {
     const memberships = await prisma.bubbleMembership.findMany({
@@ -78,15 +77,11 @@ router.get('/', optionalAuth, async (req, res) => {
 
   const where = {}
 
-  // Restreindre aux bulles de l'utilisateur (ou montrer uniquement contenu sans bulle si pas connecté)
   if (bubbleIds !== null && bubbleIds.length > 0) {
-    where.bubbleId = { in: bubbleIds }
+    where.bubbles = { some: { bubbleId: { in: bubbleIds } } }
   } else if (bubbleIds !== null && bubbleIds.length === 0) {
-    // Membre d'aucune bulle → rien à montrer
     return res.json({ items: [], total: 0, page: pageNum, hasMore: false })
-  }
-  // Si non connecté → rien à montrer
-  else if (bubbleIds === null) {
+  } else if (bubbleIds === null) {
     return res.json({ items: [], total: 0, page: pageNum, hasMore: false })
   }
 
@@ -109,7 +104,6 @@ router.get('/', optionalAuth, async (req, res) => {
       { title:  { contains: s } },
       { author: { contains: s } },
     ]
-    // Combiner avec OR existant si contributor est actif
     where.AND = [{ OR: searchConditions }]
     if (where.OR) { where.AND.push({ OR: where.OR }); delete where.OR }
   }
@@ -125,23 +119,14 @@ router.get('/', optionalAuth, async (req, res) => {
 
   const userId = req.user?.id || null
 
-  // Enrichir avec scores et dernière activité
   const enriched = contents.map(c => {
     const up   = c.votes.filter(v => v.type === 'UP').length
     const down = c.votes.filter(v => v.type === 'DOWN').length
-
-    // Score votes → 0-20 (neutre = 10 si aucun vote)
     const votesScore = up + down > 0 ? 10 + ((up - down) / (up + down)) * 10 : 10
-
-    // Moyenne des critiques → 0-20 (fallback = note créateur)
     const reviewAvg = c.reviews.length > 0
       ? c.reviews.reduce((sum, r) => sum + r.rating, 0) / c.reviews.length
       : c.rating
-
-    // Score global = moyenne des 3 notes /20
     const globalScore = (c.rating + reviewAvg + votesScore) / 3
-
-    // Dernière activité = max(createdAt, dernière review, dernier vote)
     const lastActivity = Math.max(
       new Date(c.createdAt).getTime(),
       ...c.reviews.map(r => new Date(r.createdAt).getTime()),
@@ -160,14 +145,12 @@ router.get('/', optionalAuth, async (req, res) => {
     }
   })
 
-  // Tri
   if (sort === 'score') {
     enriched.sort((a, b) => b._score - a._score)
   } else {
     enriched.sort((a, b) => b._lastActivity - a._lastActivity)
   }
 
-  // Pagination
   const total = enriched.length
   const start = (pageNum - 1) * limitNum
   const items = enriched
@@ -177,61 +160,79 @@ router.get('/', optionalAuth, async (req, res) => {
   res.json({ items, total, page: pageNum, hasMore: start + limitNum < total })
 })
 
-// GET single content (public)
+// GET single content
 router.get('/:id', async (req, res) => {
   const content = await prisma.content.findUnique({
     where: { id: parseInt(req.params.id) },
     include: {
       user: { select: { name: true } },
-      bubble: { select: { id: true, name: true } },
+      bubbles: { include: { bubble: { select: { id: true, name: true } } } },
     },
   })
   if (!content) return res.status(404).json({ error: 'Non trouvé' })
-  res.json(content)
+  const result = {
+    ...content,
+    bubbles: content.bubbles.map(cb => ({ id: cb.bubbleId, name: cb.bubble.name })),
+  }
+  res.json(result)
 })
 
-// PATCH /:id/bubble — changer la bulle d'un contenu (auteur uniquement)
-router.patch('/:id/bubble', requireApproved, async (req, res) => {
+// POST /:id/bubbles — ajouter le contenu dans une bulle (auteur uniquement)
+router.post('/:id/bubbles', requireApproved, async (req, res) => {
   const contentId = parseInt(req.params.id)
-  const newBubbleId = parseInt(req.body.bubbleId)
-  if (!newBubbleId) return res.status(400).json({ error: 'bubbleId requis' })
+  const { bubbleId } = req.body
+  if (!bubbleId) return res.status(400).json({ error: 'bubbleId requis' })
 
   const content = await prisma.content.findUnique({ where: { id: contentId } })
   if (!content) return res.status(404).json({ error: 'Non trouvé' })
-  // Seul le créateur peut changer de bulle
   if (content.userId !== req.user.id) {
-    return res.status(403).json({ error: 'Seul le créateur peut changer la bulle' })
+    return res.status(403).json({ error: 'Seul le créateur peut modifier les bulles' })
   }
 
-  // Vérifier que le créateur est membre de la bulle cible
+  const bId = parseInt(bubbleId)
   const membership = await prisma.bubbleMembership.findUnique({
-    where: { userId_bubbleId: { userId: req.user.id, bubbleId: newBubbleId } },
+    where: { userId_bubbleId: { userId: req.user.id, bubbleId: bId } },
   })
   if (!membership) return res.status(403).json({ error: 'Vous n\'êtes pas membre de cette bulle' })
 
-  // Récupérer les membres de la nouvelle bulle
-  const newBubbleMembers = await prisma.bubbleMembership.findMany({
-    where: { bubbleId: newBubbleId },
-    select: { userId: true },
-  })
-  const memberIds = new Set(newBubbleMembers.map(m => m.userId))
-
-  // Supprimer les reviews et votes des utilisateurs non-membres de la nouvelle bulle
-  await prisma.review.deleteMany({
-    where: { contentId, userId: { notIn: [...memberIds] } },
-  })
-  await prisma.vote.deleteMany({
-    where: { contentId, userId: { notIn: [...memberIds] } },
+  await prisma.contentBubble.upsert({
+    where: { contentId_bubbleId: { contentId, bubbleId: bId } },
+    create: { contentId, bubbleId: bId },
+    update: {},
   })
 
-  const bubble = await prisma.bubble.findUnique({ where: { id: newBubbleId } })
-  await prisma.content.update({ where: { id: contentId }, data: { bubbleId: newBubbleId } })
-  res.json({ bubbleId: newBubbleId, bubbleName: bubble.name })
+  const bubble = await prisma.bubble.findUnique({ where: { id: bId }, select: { name: true } })
+  res.json({ bubbleId: bId, bubbleName: bubble.name })
+})
+
+// DELETE /:id/bubbles/:bubbleId — retirer le contenu d'une bulle
+router.delete('/:id/bubbles/:bubbleId', requireApproved, async (req, res) => {
+  const contentId = parseInt(req.params.id)
+  const bubbleId = parseInt(req.params.bubbleId)
+
+  const content = await prisma.content.findUnique({ where: { id: contentId } })
+  if (!content) return res.status(404).json({ error: 'Non trouvé' })
+  if (content.userId !== req.user.id && !req.user.isAdmin) {
+    return res.status(403).json({ error: 'Non autorisé' })
+  }
+
+  await prisma.contentBubble.deleteMany({ where: { contentId, bubbleId } })
+
+  const remaining = await prisma.contentBubble.count({ where: { contentId } })
+  if (remaining === 0) {
+    await prisma.vote.deleteMany({ where: { contentId } })
+    await prisma.review.deleteMany({ where: { contentId } })
+    await prisma.content.delete({ where: { id: contentId } })
+    return res.json({ deleted: true })
+  }
+
+  res.json({ deleted: false, remaining })
 })
 
 // POST create content (auth + approved)
 router.post('/', requireApproved, upload.single('coverImage'), async (req, res) => {
-  const { title, author, summary, whyRead, rating, support, genre, publishDate, url, bubbleId } = req.body; const sponsor = req.user.name
+  const { title, author, summary, whyRead, rating, support, genre, publishDate, url, bubbleId } = req.body
+  const sponsor = req.user.name
 
   if (!title || !whyRead || !rating) {
     return res.status(400).json({ error: 'Champs obligatoires manquants' })
@@ -245,9 +246,9 @@ router.post('/', requireApproved, upload.single('coverImage'), async (req, res) 
     return res.status(400).json({ error: 'Note invalide (0 à 20)' })
   }
 
-  // Vérifier que l'utilisateur est bien membre de la bulle
+  const bId = parseInt(bubbleId)
   const membership = await prisma.bubbleMembership.findUnique({
-    where: { userId_bubbleId: { userId: req.user.id, bubbleId: parseInt(bubbleId) } },
+    where: { userId_bubbleId: { userId: req.user.id, bubbleId: bId } },
   })
   if (!membership) return res.status(403).json({ error: 'Vous n\'êtes pas membre de cette bulle' })
 
@@ -265,7 +266,7 @@ router.post('/', requireApproved, upload.single('coverImage'), async (req, res) 
       url: url || null,
       publishDate: publishDate ? new Date(publishDate) : null,
       userId: req.user.id,
-      bubbleId: parseInt(bubbleId),
+      bubbles: { create: { bubbleId: bId } },
     },
   })
   res.status(201).json(content)
@@ -279,7 +280,8 @@ router.put('/:id', requireApproved, upload.single('coverImage'), async (req, res
     return res.status(403).json({ error: 'Non autorisé' })
   }
 
-  const { title, author, summary, whyRead, rating, support, genre, publishDate, url } = req.body; const sponsor = req.user.name
+  const { title, author, summary, whyRead, rating, support, genre, publishDate, url } = req.body
+  const sponsor = req.user.name
 
   if (whyRead && wordCount(whyRead) < 20) return res.status(400).json({ error: `"Pourquoi en faire l'expérience" trop court (${wordCount(whyRead)} mots, minimum 20)` })
 
@@ -300,7 +302,7 @@ router.put('/:id', requireApproved, upload.single('coverImage'), async (req, res
   res.json(updated)
 })
 
-// DELETE (own or admin)
+// DELETE (own or admin) — suppression complète
 router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id)
@@ -309,6 +311,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
     if (content.userId !== req.user.id && !req.user.isAdmin) {
       return res.status(403).json({ error: 'Non autorisé' })
     }
+    await prisma.contentBubble.deleteMany({ where: { contentId: id } })
     await prisma.vote.deleteMany({ where: { contentId: id } })
     await prisma.review.deleteMany({ where: { contentId: id } })
     await prisma.content.delete({ where: { id } })
