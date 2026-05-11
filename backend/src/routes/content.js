@@ -62,7 +62,7 @@ router.get('/contributors', optionalAuth, async (req, res) => {
 
 // GET all contents with pagination, sorting and filters
 router.get('/', optionalAuth, async (req, res) => {
-  const { support, genre, minRating, maxRating, contributor, search, sort = 'recent', page = 1, limit = 20 } = req.query
+  const { support, genre, minRating, maxRating, contributor, search, sort = 'recent', page = 1, limit = 20, bubbleId: bubbleIdFilter } = req.query
   const pageNum = Math.max(1, parseInt(page) || 1)
   const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20))
 
@@ -78,7 +78,13 @@ router.get('/', optionalAuth, async (req, res) => {
   const where = {}
 
   if (bubbleIds !== null && bubbleIds.length > 0) {
-    where.bubbles = { some: { bubbleId: { in: bubbleIds } } }
+    if (bubbleIdFilter) {
+      const specific = parseInt(bubbleIdFilter)
+      if (!bubbleIds.includes(specific)) return res.json({ items: [], total: 0, page: pageNum, hasMore: false })
+      where.bubbles = { some: { bubbleId: specific } }
+    } else {
+      where.bubbles = { some: { bubbleId: { in: bubbleIds } } }
+    }
   } else if (bubbleIds !== null && bubbleIds.length === 0) {
     return res.json({ items: [], total: 0, page: pageNum, hasMore: false })
   } else if (bubbleIds === null) {

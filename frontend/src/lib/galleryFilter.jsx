@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from 'react'
 
 const GalleryFilterContext = createContext(null)
 
-const EMPTY_FILTERS = { support: '', genre: '', minRating: '', contributor: '' }
+const EMPTY_FILTERS = { support: '', genre: '', minRating: '', contributor: '', bubble: '' }
 
 export function GalleryFilterProvider({ children }) {
   const [filtersVisible, setFiltersVisible] = useState(false)

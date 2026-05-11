@@ -61,6 +61,7 @@ export default function Gallery() {
   const [supports, setSupports] = useState([])
   const [genres, setGenres] = useState([])
   const [contributors, setContributors] = useState([])
+  const [userBubbles, setUserBubbles] = useState([])
   const saveZoomTimer = useRef(null)
   const searchTimer = useRef(null)
   const loaderRef = useRef(null)
@@ -77,15 +78,16 @@ export default function Gallery() {
     api.tags.list('support').then(ts => setSupports(ts.map(t => t.value)))
     api.tags.list('genre').then(ts => setGenres(ts.map(t => t.value)))
     api.contributors.list().then(setContributors)
-  }, [])
+    if (user?.isApproved) api.bubbles.mine().then(setUserBubbles).catch(() => {})
+  }, [user?.id])
 
   // Reset quand filtres/tri/recherche changent
   useEffect(() => {
     setFilterVersion(v => v + 1)
     setPage(1)
     setAllContents([])
-    setHasActiveFilters(!!(filters.support || filters.genre || filters.minRating || filters.contributor || search))
-  }, [filters.support, filters.genre, filters.minRating, filters.contributor, sort, search])
+    setHasActiveFilters(!!(filters.support || filters.genre || filters.minRating || filters.contributor || filters.bubble || search))
+  }, [filters.support, filters.genre, filters.minRating, filters.contributor, filters.bubble, sort, search])
 
   // Charger une page
   useEffect(() => {
@@ -94,6 +96,7 @@ export default function Gallery() {
     if (filters.genre) params.genre = filters.genre
     if (filters.minRating) params.minRating = filters.minRating
     if (filters.contributor) params.contributor = filters.contributor
+    if (filters.bubble) params.bubbleId = filters.bubble
     if (search) params.search = search
 
     if (page === 1) setLoading(true)
@@ -214,7 +217,13 @@ export default function Gallery() {
                 <option value="">Tous les contributeurs</option>
                 {contributors.map(name => <option key={name} value={name}>{name}</option>)}
               </select>
-              {(filters.support || filters.genre || filters.minRating || filters.contributor) && (
+              {userBubbles.length > 1 && (
+                <select value={filters.bubble} onChange={e => setFilter('bubble', e.target.value)}>
+                  <option value="">Toutes les bulles</option>
+                  {userBubbles.map(b => <option key={b.id} value={b.id}>🫧 {b.name}</option>)}
+                </select>
+              )}
+              {(filters.support || filters.genre || filters.minRating || filters.contributor || filters.bubble) && (
                 <button className="btn-ghost" onClick={resetFilters}>Réinitialiser</button>
               )}
             </div>
@@ -253,7 +262,7 @@ export default function Gallery() {
               <Link to="/register" className="btn-ghost">Créer un compte</Link>
             </div>
           </div>
-        ) : !loading && allContents.length === 0 && !filters.support && !filters.genre && !filters.minRating && !filters.contributor && !search ? (
+        ) : !loading && allContents.length === 0 && !filters.support && !filters.genre && !filters.minRating && !filters.contributor && !filters.bubble && !search ? (
           <div className="gallery-no-bubble">
             <p>Vous devez être invité à au moins une bulle de partage pour voir ici les expériences à partager.</p>
             <p className="gallery-no-bubble-hint">Demandez une invitation à un membre.</p>
