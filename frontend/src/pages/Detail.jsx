@@ -71,10 +71,12 @@ export default function Detail() {
   const [voteLoading, setVoteLoading] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [userBubbles, setUserBubbles] = useState([])
-  // Multi-bulle
+  // Multi-bulle (auteur)
   const [selectedBubbles, setSelectedBubbles] = useState([])
   const [bubblesDirty, setBubblesDirty] = useState(false)
   const [bubblesUpdating, setBubblesUpdating] = useState(false)
+  // Copie (membres non-auteurs)
+  const [copyBubbles, setCopyBubbles] = useState([])
   // Suppression par bulle
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteBubbles, setDeleteBubbles] = useState([])
@@ -185,6 +187,23 @@ export default function Detail() {
       setContent(updated)
       setSelectedBubbles((updated.bubbles || []).map(b => b.id))
       setBubblesDirty(false)
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setBubblesUpdating(false)
+    }
+  }
+
+  async function handleCopyToBubbles() {
+    if (copyBubbles.length === 0) return
+    setBubblesUpdating(true)
+    try {
+      for (const bubbleId of copyBubbles) {
+        await api.content.addBubble(id, bubbleId)
+      }
+      const updated = await api.content.get(id)
+      setContent(updated)
+      setCopyBubbles([])
     } catch (err) {
       alert(err.message)
     } finally {
@@ -346,6 +365,42 @@ export default function Detail() {
                 <span className="detail-bubble-badge">🫧 {contentBubbles.map(b => b.name).join(', ')}</span>
               )}
             </div>
+
+            {/* Copier dans une autre bulle (membres non-auteurs) */}
+            {!isAuthor && user?.isApproved && (() => {
+              const copyableBubbles = userBubbles.filter(b => !contentBubbles.some(cb => cb.id === b.id))
+              const hasAccess = userBubbles.some(b => contentBubbles.some(cb => cb.id === b.id))
+              if (!hasAccess || copyableBubbles.length === 0) return null
+              return (
+                <div className="detail-bubble-change">
+                  <label className="detail-bubble-change-label">Copier dans :</label>
+                  <div className="bubble-checkbox-list">
+                    {copyableBubbles.map(b => (
+                      <label key={b.id} className="bubble-checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={copyBubbles.includes(b.id)}
+                          onChange={e => setCopyBubbles(prev =>
+                            e.target.checked ? [...prev, b.id] : prev.filter(x => x !== b.id)
+                          )}
+                        />
+                        {b.name}
+                      </label>
+                    ))}
+                  </div>
+                  {copyBubbles.length > 0 && (
+                    <div className="bubble-save-row">
+                      <button className="btn btn-sm" onClick={handleCopyToBubbles} disabled={bubblesUpdating}>
+                        {bubblesUpdating ? 'Copie…' : 'Copier'}
+                      </button>
+                      <button className="btn-ghost btn-sm" onClick={() => setCopyBubbles([])} disabled={bubblesUpdating}>
+                        Annuler
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Sélection multi-bulle (auteur uniquement) */}
             {isAuthor && userBubbles.length > 0 && (

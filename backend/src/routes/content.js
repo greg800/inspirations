@@ -183,17 +183,25 @@ router.get('/:id', async (req, res) => {
   res.json(result)
 })
 
-// POST /:id/bubbles — ajouter le contenu dans une bulle (auteur uniquement)
+// POST /:id/bubbles — copier le contenu dans une bulle
+// Accessible à tout membre d'une bulle qui contient déjà ce contenu
 router.post('/:id/bubbles', requireApproved, async (req, res) => {
   const contentId = parseInt(req.params.id)
   const { bubbleId } = req.body
   if (!bubbleId) return res.status(400).json({ error: 'bubbleId requis' })
 
-  const content = await prisma.content.findUnique({ where: { id: contentId } })
+  const content = await prisma.content.findUnique({
+    where: { id: contentId },
+    include: { bubbles: { select: { bubbleId: true } } },
+  })
   if (!content) return res.status(404).json({ error: 'Non trouvé' })
-  if (content.userId !== req.user.id) {
-    return res.status(403).json({ error: 'Seul le créateur peut modifier les bulles' })
-  }
+
+  // Vérifier que l'utilisateur est membre d'au moins une bulle qui contient ce contenu
+  const contentBubbleIds = content.bubbles.map(cb => cb.bubbleId)
+  const sourceMembership = await prisma.bubbleMembership.findFirst({
+    where: { userId: req.user.id, bubbleId: { in: contentBubbleIds } },
+  })
+  if (!sourceMembership) return res.status(403).json({ error: 'Vous n\'avez pas accès à ce contenu' })
 
   const bId = parseInt(bubbleId)
   const membership = await prisma.bubbleMembership.findUnique({
