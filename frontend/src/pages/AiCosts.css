@@ -1,0 +1,133 @@
+.costs-page {
+  padding: 32px 0 120px;
+}
+
+.costs-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+}
+
+.costs-page h1 {
+  margin-bottom: 4px;
+}
+
+.costs-subtitle {
+  color: var(--color-text-secondary);
+  max-width: 720px;
+  margin-bottom: 24px;
+}
+
+.costs-error {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.costs-loading,
+.costs-empty {
+  color: var(--color-text-secondary);
+  padding: 20px 0;
+}
+
+/* Bandeau « total engagé » */
+.costs-total {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.costs-total-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.costs-total-value {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-accent);
+  letter-spacing: -0.02em;
+}
+
+.costs-total-detail {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.costs-table {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+.costs-head,
+.costs-row {
+  display: grid;
+  grid-template-columns: 2fr 80px 100px 110px 150px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  min-width: 640px;
+}
+
+.costs-head {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.costs-row {
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+}
+
+.costs-row:last-child {
+  border-bottom: none;
+}
+
+.costs-feature {
+  font-weight: 600;
+}
+
+.costs-amount {
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.costs-date {
+  color: var(--color-text-secondary);
+}
+
+.costs-refresh {
+  margin-top: 20px;
+  padding: 10px 18px;
+  background: transparent;
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.costs-refresh:hover {
+  background: var(--color-surface);
+}

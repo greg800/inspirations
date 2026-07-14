@@ -53,7 +53,7 @@
 .storic-head,
 .storic-row {
   display: grid;
-  grid-template-columns: 1fr 120px 70px 44px;
+  grid-template-columns: 1fr 120px 70px 80px;
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
@@ -106,7 +106,13 @@
   color: var(--color-text);
 }
 
-.storic-delete-btn {
+.storic-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.storic-icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,9 +124,15 @@
   border-radius: var(--radius);
   color: var(--color-text-secondary);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-.storic-delete-btn:hover {
+.storic-icon-btn:hover {
+  border-color: var(--color-cta);
+  color: var(--color-cta);
+}
+
+.storic-icon-btn.storic-delete-btn:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
@@ -129,7 +141,7 @@
 @media (max-width: 600px) {
   .storic-head,
   .storic-row {
-    grid-template-columns: 1fr 90px 50px 40px;
+    grid-template-columns: 1fr 90px 44px 76px;
     gap: 8px;
     padding: 12px 10px;
   }

@@ -1,0 +1,112 @@
+.prompt-page {
+  padding: 32px 0 120px;
+}
+
+.prompt-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+}
+
+.prompt-page h1 {
+  margin-bottom: 4px;
+}
+
+.prompt-subtitle {
+  color: var(--color-text-secondary);
+  max-width: 640px;
+  margin-bottom: 20px;
+}
+
+.prompt-error {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.prompt-loading {
+  color: var(--color-text-secondary);
+  padding: 20px 0;
+}
+
+.prompt-status {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 6px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.prompt-input {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  background: var(--color-bg);
+  color: var(--color-text);
+  resize: vertical;
+}
+
+.prompt-input:focus {
+  outline: none;
+  border-color: var(--color-cta);
+}
+
+.prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.prompt-btn {
+  padding: 12px 20px;
+  background: var(--color-cta);
+  color: var(--color-cta-text);
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.prompt-btn:hover:not(:disabled) {
+  background: var(--color-cta-hover);
+}
+
+.prompt-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.prompt-btn.ghost {
+  background: transparent;
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+}
+
+.prompt-btn.ghost:hover:not(:disabled) {
+  background: var(--color-surface);
+}
+
+.prompt-saved {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-accent);
+}

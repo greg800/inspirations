@@ -118,6 +118,11 @@ export default function Admin() {
                 <button className="btn" onClick={() => { addTag('genre', newGenre); setNewGenre('') }}>Ajouter</button>
               </div>
             </section>
+
+            <section className="admin-section">
+              <h2>Storic</h2>
+              <button className="btn" onClick={() => navigate('/admin/ai-costs')}>Coût IA</button>
+            </section>
           </>
         )}
       </div>

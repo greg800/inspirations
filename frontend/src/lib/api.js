@@ -93,6 +93,19 @@ export const api = {
     update: (id, title) => request(`/stories/${id}`, { method: 'PATCH', body: JSON.stringify({ title }) }),
     delete: (id) => request(`/stories/${id}`, { method: 'DELETE' }),
   },
+  premises: {
+    list: (storyId) => request(`/stories/${storyId}/premises`),
+    create: (storyId, text) => request(`/stories/${storyId}/premises`, { method: 'POST', body: JSON.stringify({ text }) }),
+    improve: (storyId, text) => request(`/stories/${storyId}/premises/improve`, { method: 'POST', body: JSON.stringify({ text }) }),
+    update: (storyId, id, data) => request(`/stories/${storyId}/premises/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (storyId, id) => request(`/stories/${storyId}/premises/${id}`, { method: 'DELETE' }),
+  },
+  ai: {
+    getPrompt: (key) => request(`/ai/prompts/${key}`),
+    savePrompt: (key, content) => request(`/ai/prompts/${key}`, { method: 'PUT', body: JSON.stringify({ content }) }),
+    resetPrompt: (key) => request(`/ai/prompts/${key}`, { method: 'DELETE' }),
+    costs: () => request('/ai/costs'),
+  },
   bubbles: {
     mine: () => request('/bubbles/mine'),
     create: (name) => request('/bubbles', { method: 'POST', body: JSON.stringify({ name }) }),

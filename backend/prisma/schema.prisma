@@ -28,6 +28,7 @@ model User {
   bubblesCreated       Bubble[]           @relation("BubbleCreator")
   bubbleInvitesSent    BubbleInvitation[] @relation("BubbleInviter")
   stories              Story[]
+  aiPrompts            AiPrompt[]
 }
 
 // Storic — outil de création d'histoires. Espace strictement privé : une histoire
@@ -39,6 +40,43 @@ model Story {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  premises  Premise[]
+}
+
+// Une prémisse candidate pour une histoire. Note de 0 à 20, 10 par défaut.
+model Premise {
+  id        Int      @id @default(autoincrement())
+  text      String
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Prompt IA éditable par l'utilisateur. Une ligne par (utilisateur, clé).
+// Si absente, le prompt par défaut du code s'applique.
+model AiPrompt {
+  id        Int      @id @default(autoincrement())
+  key       String
+  content   String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, key])
+}
+
+// Journal des appels à l'IA : une ligne par appel, pour la page Coûts IA.
+model AiCall {
+  id           Int      @id @default(autoincrement())
+  feature      String
+  model        String
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Float
+  userId       Int?
+  createdAt    DateTime @default(now())
 }
 
 model PasswordResetToken {

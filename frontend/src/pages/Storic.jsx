@@ -23,6 +23,13 @@ const TrashIcon = () => (
   </svg>
 )
 
+const EyeIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M1.5 12S5 5.5 12 5.5 22.5 12 22.5 12 19 18.5 12 18.5 1.5 12 1.5 12z" />
+    <circle cx="12" cy="12" r="3.2" />
+  </svg>
+)
+
 export default function Storic() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -181,13 +188,24 @@ export default function Storic() {
                     {computeScore(story) ?? <span className="storic-muted">—</span>}
                   </span>
 
-                  <button
-                    className="storic-delete-btn"
-                    onClick={() => deleteStory(story)}
-                    aria-label={`Supprimer ${story.title}`}
-                  >
-                    <TrashIcon />
-                  </button>
+                  <div className="storic-actions">
+                    <button
+                      className="storic-icon-btn"
+                      onClick={() => navigate(`/storic/${story.id}`)}
+                      aria-label={`Ouvrir les prémisses de ${story.title}`}
+                      title="Prémisses"
+                    >
+                      <EyeIcon />
+                    </button>
+                    <button
+                      className="storic-icon-btn storic-delete-btn"
+                      onClick={() => deleteStory(story)}
+                      aria-label={`Supprimer ${story.title}`}
+                      title="Supprimer"
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
                 </div>
               ))
             )}

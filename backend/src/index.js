@@ -15,6 +15,8 @@ import activityRouter from './routes/activity.js'
 import notificationsRouter from './routes/notifications.js'
 import bubblesRouter from './routes/bubbles.js'
 import storiesRouter from './routes/stories.js'
+import premisesRouter from './routes/premises.js'
+import aiRouter from './routes/ai.js'
 
 const app = express()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -40,6 +42,8 @@ app.use('/api/activity', activityRouter)
 app.use('/api/notifications', notificationsRouter)
 app.use('/api/bubbles', bubblesRouter)
 app.use('/api/stories', storiesRouter)
+app.use('/api/stories/:storyId/premises', premisesRouter)
+app.use('/api/ai', aiRouter)
 
 // En production : servir le frontend buildé
 if (isProd) {
