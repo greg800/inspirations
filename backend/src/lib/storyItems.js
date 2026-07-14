@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { requireAuth } from '../middleware/auth.js'
 import { askClaude } from './ai.js'
 import { defaultPrompt } from './prompts.js'
+import { buildContext, buildUserMessage } from './steps.js'
 
 const prisma = new PrismaClient()
 
@@ -13,16 +14,15 @@ export function countWords(text) {
 }
 
 /**
- * Prémisses et profondeurs sont deux listes de la même forme, rattachées à une
- * histoire : un texte de 200 mots maximum, une note de 0 à 20, ajoutables telles
- * quelles ou après passage par l'IA. Cette fabrique construit le routeur commun.
- *
- * @param delegate   le modèle Prisma (prisma.premise, prisma.depth)
- * @param promptKey  la clé du prompt IA à utiliser pour /improve
- * @param feature    le libellé affiché dans la page Coûts IA
- * @param notFound   le message d'erreur quand la ligne n'existe pas
+ * Chaque étape du pipeline (prémisse, profondeur, …) est une liste de la même
+ * forme rattachée à une histoire : un texte de 200 mots maximum, une note de 0 à
+ * 20, ajoutable telle quelle ou après passage par l'IA. Cette fabrique construit
+ * le routeur commun à partir d'une entrée de STEPS (voir lib/steps.js).
  */
-export function createStoryItemRouter({ delegate, promptKey, feature, notFound }) {
+export function createStoryItemRouter(step) {
+  const { model, promptKey, feature, notFound } = step
+  const delegate = prisma[model]
+
   // mergeParams : le routeur est monté sous /api/stories/:storyId.
   const router = Router({ mergeParams: true })
 
@@ -95,10 +95,14 @@ export function createStoryItemRouter({ delegate, promptKey, feature, notFound }
     const system = custom?.content || defaultPrompt(promptKey)
 
     try {
+      // L'IA doit tenir compte de ce qui a déjà été établi : élément retenu de
+      // chaque étape précédente, et tous les textes déjà écrits à cette étape.
+      const context = await buildContext(prisma, storyId, step.key)
+
       const improved = await askClaude({
         feature,
         system,
-        prompt: text.trim(),
+        prompt: buildUserMessage(context, text.trim()),
         userId: req.user.id,
       })
       const item = await delegate.create({ data: { text: improved, storyId } })

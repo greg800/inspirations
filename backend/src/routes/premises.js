@@ -1,12 +1,4 @@
-import { PrismaClient } from '@prisma/client'
 import { createStoryItemRouter } from '../lib/storyItems.js'
-import { PROMPT_KEYS } from '../lib/prompts.js'
+import { stepByKey } from '../lib/steps.js'
 
-const prisma = new PrismaClient()
-
-export default createStoryItemRouter({
-  delegate: prisma.premise,
-  promptKey: PROMPT_KEYS.PREMISE_IMPROVE,
-  feature: 'Prémisse — simplifier et améliorer le style',
-  notFound: 'Prémisse introuvable',
-})
+export default createStoryItemRouter(stepByKey('premise'))

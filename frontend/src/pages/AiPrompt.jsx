@@ -77,8 +77,12 @@ export default function AiPrompt() {
         <h1>Prompt de l'IA</h1>
         <p className="prompt-subtitle">
           {label
-            ? <>Ce texte est envoyé à Claude quand vous cliquez sur « {label} ». Votre propre texte lui est transmis ensuite, séparément.</>
-            : <>Ce texte est envoyé à Claude. Votre propre texte lui est transmis ensuite, séparément.</>}
+            ? <>Ce texte est envoyé à Claude comme consigne quand vous cliquez sur « {label} ».</>
+            : <>Ce texte est envoyé à Claude comme consigne.</>}
+          {' '}
+          Le contexte de l'histoire — titre, éléments retenus aux étapes précédentes, textes
+          déjà écrits à cette étape — lui est transmis <strong>automatiquement</strong>, suivi de
+          votre texte. Vous n'avez pas à les recopier ici : dites seulement à Claude quoi en faire.
         </p>
 
         {error && <p className="prompt-error">{error}</p>}

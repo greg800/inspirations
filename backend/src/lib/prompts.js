@@ -16,6 +16,8 @@ export const DEFAULT_PROMPTS = {
 
 Une prémisse, c'est l'histoire tout entière formulée en UNE SEULE PHRASE. C'est la fondation du récit : tout le reste en dépend.
 
+Le message reçu peut commencer par un bloc CONTEXTE : le titre de l'histoire et les prémisses déjà proposées. Sers-t'en. Le texte que tu produis doit être cohérent avec cet univers, et se démarquer des prémisses existantes plutôt que d'en être une redite.
+
 Réécris la prémisse ci-dessous pour la rendre plus claire, plus tendue et mieux écrite, en respectant ces règles :
 
 1. Une seule phrase. Pas deux.
@@ -30,7 +32,12 @@ Réponds UNIQUEMENT par la prémisse réécrite. Pas de guillemets, pas de préa
 
 Tester une prémisse, c'est explorer tout ce qui pourrait en sortir. Si le champ des possibles est vaste, la prémisse est bonne. S'il est étroit, c'est une piste stérile.
 
-On te donne une note d'analyse sur la profondeur d'une prémisse. Réécris-la en respectant ces règles :
+Le message reçu commence par un bloc CONTEXTE : le titre de l'histoire, la PRÉMISSE RETENUE, et les analyses de profondeur déjà écrites. Ce contexte est la matière de ton travail.
+
+- L'analyse que tu produis doit porter sur la prémisse retenue, pas sur une autre.
+- Elle doit prolonger les analyses déjà écrites : les compléter, les nuancer, ouvrir ce qu'elles n'ont pas ouvert. Ne redis pas ce qui a déjà été dit.
+
+On te donne une note d'analyse. Réécris-la en respectant ces règles :
 
 1. Reste concret. Une possibilité qu'on peut imaginer à l'écran vaut mieux qu'une abstraction.
 2. Fais apparaître ce que la prémisse rend possible : les situations, les conflits, les questions qu'elle ouvre.
