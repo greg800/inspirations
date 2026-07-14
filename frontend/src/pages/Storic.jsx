@@ -5,16 +5,10 @@ import { useAuth } from '../lib/auth.jsx'
 import { useStickyActions } from '../lib/stickyActions.jsx'
 import './Storic.css'
 
-const TITLE_MAX = 15
-
 // La note sur 20 n'a pas encore de règle de calcul définie.
 // Tant qu'elle n'est pas spécifiée, on renvoie null et le tableau affiche « — ».
 function computeScore(story) {
   return null
-}
-
-function truncate(title) {
-  return title.length > TITLE_MAX ? title.slice(0, TITLE_MAX) + '…' : title
 }
 
 const TrashIcon = () => (
@@ -47,6 +41,11 @@ export default function Storic() {
 
   const draftRef = useRef(null)
   const editRef = useRef(null)
+  // Un double-clic émet d'abord deux clics simples. On temporise donc l'ouverture
+  // de la prémisse pour pouvoir l'annuler si un double-clic (renommage) suit.
+  const clickTimer = useRef(null)
+
+  useEffect(() => () => clearTimeout(clickTimer.current), [])
 
   useEffect(() => {
     if (!user) { navigate('/login'); return }
@@ -77,7 +76,16 @@ export default function Storic() {
     }
   }
 
+  // Clic simple : ouvre la prémisse, après un délai pour laisser une chance
+  // au double-clic (renommage) de s'annoncer.
+  function openPremise(story) {
+    if (editingId === story.id) return
+    clearTimeout(clickTimer.current)
+    clickTimer.current = setTimeout(() => navigate(`/storic/${story.id}`), 250)
+  }
+
   function startEditing(story) {
+    clearTimeout(clickTimer.current)
     setEditingId(story.id)
     setEditingTitle(story.title)
   }
@@ -128,7 +136,7 @@ export default function Storic() {
           <div className="storic-table">
             <div className="storic-head">
               <span>Titre</span>
-              <span>Création</span>
+              <span className="storic-date">Création</span>
               <span>Note</span>
               <span />
             </div>
@@ -147,7 +155,7 @@ export default function Storic() {
                     if (e.key === 'Escape') setDraftTitle(null)
                   }}
                 />
-                <span className="storic-muted">—</span>
+                <span className="storic-date storic-muted">—</span>
                 <span className="storic-muted">—</span>
                 <span />
               </div>
@@ -159,7 +167,8 @@ export default function Storic() {
               stories.map(story => (
                 <div
                   key={story.id}
-                  className="storic-row"
+                  className="storic-row clickable"
+                  onClick={() => openPremise(story)}
                   onDoubleClick={() => startEditing(story)}
                 >
                   {editingId === story.id ? (
@@ -169,6 +178,7 @@ export default function Storic() {
                       value={editingTitle}
                       onChange={e => setEditingTitle(e.target.value)}
                       onBlur={saveEditing}
+                      onClick={e => e.stopPropagation()}
                       onKeyDown={e => {
                         if (e.key === 'Enter') saveEditing()
                         if (e.key === 'Escape') setEditingId(null)
@@ -176,7 +186,7 @@ export default function Storic() {
                     />
                   ) : (
                     <span className="storic-title" title={story.title}>
-                      {truncate(story.title)}
+                      {story.title}
                     </span>
                   )}
 
@@ -188,7 +198,7 @@ export default function Storic() {
                     {computeScore(story) ?? <span className="storic-muted">—</span>}
                   </span>
 
-                  <div className="storic-actions">
+                  <div className="storic-actions" onClick={e => e.stopPropagation()}>
                     <button
                       className="storic-icon-btn"
                       onClick={() => navigate(`/storic/${story.id}`)}

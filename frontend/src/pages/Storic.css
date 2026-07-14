@@ -81,8 +81,21 @@
   background: var(--color-surface);
 }
 
+/* Un clic simple ouvre la prémisse */
+.storic-row.clickable {
+  cursor: pointer;
+}
+
+/* Le titre occupe toute la colonne et se coupe en « … » à la largeur réelle
+   disponible : le nombre de caractères visibles s'adapte donc à l'écran.
+   min-width: 0 est indispensable — sans lui, un enfant de grille refuse de
+   passer sous la largeur de son contenu et l'ellipse ne se déclenche jamais. */
 .storic-title {
   font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .storic-date,
@@ -137,12 +150,16 @@
   color: var(--color-accent);
 }
 
-/* Mobile : la colonne date passe à l'essentiel */
+/* Mobile : la date disparaît, tout l'espace gagné revient au titre */
 @media (max-width: 600px) {
   .storic-head,
   .storic-row {
-    grid-template-columns: 1fr 90px 44px 76px;
+    grid-template-columns: 1fr 44px 76px;
     gap: 8px;
     padding: 12px 10px;
+  }
+
+  .storic-date {
+    display: none;
   }
 }
