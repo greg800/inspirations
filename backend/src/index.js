@@ -16,6 +16,7 @@ import notificationsRouter from './routes/notifications.js'
 import bubblesRouter from './routes/bubbles.js'
 import storiesRouter from './routes/stories.js'
 import premisesRouter from './routes/premises.js'
+import depthsRouter from './routes/depths.js'
 import aiRouter from './routes/ai.js'
 
 const app = express()
@@ -43,6 +44,7 @@ app.use('/api/notifications', notificationsRouter)
 app.use('/api/bubbles', bubblesRouter)
 app.use('/api/stories', storiesRouter)
 app.use('/api/stories/:storyId/premises', premisesRouter)
+app.use('/api/stories/:storyId/depths', depthsRouter)
 app.use('/api/ai', aiRouter)
 
 // En production : servir le frontend buildé

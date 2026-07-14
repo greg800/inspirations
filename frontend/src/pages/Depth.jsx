@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { useAuth } from '../lib/auth.jsx'
 import { useStickyActions } from '../lib/stickyActions.jsx'
+// Même agencement que la page Prémisse : on réutilise ses styles.
 import './Premise.css'
 
 const MAX_WORDS = 200
@@ -24,14 +25,17 @@ const TrashIcon = () => (
   </svg>
 )
 
-export default function Premise() {
+export default function Depth() {
   const { storyId } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
   const { setActions } = useStickyActions()
 
   const [story, setStory] = useState(null)
-  const [premises, setPremises] = useState([])
+  // La prémisse retenue = celle qui a la meilleure note. Le serveur trie déjà
+  // par note décroissante, donc c'est la première de la liste.
+  const [topPremise, setTopPremise] = useState(null)
+  const [depths, setDepths] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -39,7 +43,6 @@ export default function Premise() {
   const [improving, setImproving] = useState(false)
   const [adding, setAdding] = useState(false)
 
-  // Prémisse en cours d'édition dans la boîte de dialogue
   const [editing, setEditing] = useState(null)
   const [editText, setEditText] = useState('')
   const [editScore, setEditScore] = useState(10)
@@ -51,23 +54,23 @@ export default function Premise() {
 
   useEffect(() => {
     if (!user) { navigate('/login'); return }
-    api.premises.list(storyId)
-      .then(data => { setStory(data.story); setPremises(data.items) })
+    Promise.all([api.premises.list(storyId), api.depths.list(storyId)])
+      .then(([premiseData, depthData]) => {
+        setStory(premiseData.story)
+        setTopPremise(premiseData.items[0] || null)
+        setDepths(depthData.items)
+      })
       .catch(err => setError(err.message || 'Chargement impossible'))
       .finally(() => setLoading(false))
   }, [storyId, user])
 
   useEffect(() => {
-    setActions([
-      { label: 'Évaluer la profondeur', onClick: () => navigate(`/storic/${storyId}/depth`) },
-      { label: 'Retour', ghost: true, onClick: () => navigate(-1) },
-    ])
+    setActions([{ label: 'Retour', ghost: true, onClick: () => navigate(-1) }])
     return () => setActions(null)
-  }, [storyId])
+  }, [])
 
-  function insert(premise) {
-    // Le tri (note décroissante) est fait par le serveur ; on le rejoue ici.
-    setPremises(list => [...list, premise].sort((a, b) => b.score - a.score))
+  function insert(depth) {
+    setDepths(list => [...list, depth].sort((a, b) => b.score - a.score))
     setDraft('')
   }
 
@@ -76,7 +79,7 @@ export default function Premise() {
     setError('')
     setAdding(true)
     try {
-      insert(await api.premises.create(storyId, draft))
+      insert(await api.depths.create(storyId, draft))
     } catch (err) {
       setError(err.message || 'Ajout impossible')
     } finally {
@@ -89,7 +92,7 @@ export default function Premise() {
     setError('')
     setImproving(true)
     try {
-      insert(await api.premises.improve(storyId, draft))
+      insert(await api.depths.improve(storyId, draft))
     } catch (err) {
       setError(err.message || "L'appel à l'IA a échoué")
     } finally {
@@ -97,22 +100,22 @@ export default function Premise() {
     }
   }
 
-  function openEditor(premise) {
-    setEditing(premise)
-    setEditText(premise.text)
-    setEditScore(premise.score)
+  function openEditor(depth) {
+    setEditing(depth)
+    setEditText(depth.text)
+    setEditScore(depth.score)
   }
 
   async function saveEdit() {
     if (!editText.trim() || saving) return
     setSaving(true)
     try {
-      const updated = await api.premises.update(storyId, editing.id, {
+      const updated = await api.depths.update(storyId, editing.id, {
         text: editText,
         score: Number(editScore),
       })
-      setPremises(list =>
-        list.map(p => (p.id === updated.id ? updated : p)).sort((a, b) => b.score - a.score)
+      setDepths(list =>
+        list.map(d => (d.id === updated.id ? updated : d)).sort((a, b) => b.score - a.score)
       )
       setEditing(null)
     } catch (err) {
@@ -123,11 +126,11 @@ export default function Premise() {
     }
   }
 
-  async function remove(premise) {
-    if (!confirm('Supprimer cette prémisse ? Cette action est définitive.')) return
+  async function remove(depth) {
+    if (!confirm('Supprimer cette analyse ? Cette action est définitive.')) return
     try {
-      await api.premises.delete(storyId, premise.id)
-      setPremises(list => list.filter(p => p.id !== premise.id))
+      await api.depths.delete(storyId, depth.id)
+      setDepths(list => list.filter(d => d.id !== depth.id))
     } catch (err) {
       setError(err.message || 'Suppression impossible')
     }
@@ -136,20 +139,37 @@ export default function Premise() {
   return (
     <div className="premise-page">
       <div className="container">
-        <p className="premise-eyebrow">Storic</p>
-        <h1>{story ? story.title : 'Prémisses'}</h1>
+        <p className="premise-eyebrow">Storic{story ? ` — ${story.title}` : ''}</p>
+        <h1>Profondeur</h1>
         <p className="premise-subtitle">
-          Une prémisse, c'est l'histoire tout entière formulée en une seule phrase.
+          Si le champ des possibles est vaste, la prémisse est bonne. S'il est étroit,
+          c'est une piste stérile.
         </p>
 
         {error && <p className="premise-error">{error}</p>}
+
+        {!loading && (
+          <div className="premise-retained">
+            <div className="premise-retained-label">Prémisse retenue</div>
+            {topPremise ? (
+              <>
+                <p className="premise-retained-text">{topPremise.text}</p>
+                <div className="premise-retained-score">{topPremise.score}/20</div>
+              </>
+            ) : (
+              <p className="premise-retained-empty">
+                Aucune prémisse pour cette histoire. Ajoutez-en une avant d'évaluer sa profondeur.
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="premise-compose">
           <textarea
             className={`premise-input${overLimit ? ' over' : ''}`}
             value={draft}
             onChange={e => setDraft(e.target.value)}
-            placeholder="Proposez une prémisse…"
+            placeholder="Décrivez la fertilité et la profondeur de cette prémisse : que rend-elle possible ?"
             rows={5}
             disabled={busy}
           />
@@ -164,11 +184,11 @@ export default function Premise() {
                 onClick={improve}
                 disabled={!draft.trim() || overLimit || busy}
               >
-                {improving ? 'L’IA travaille…' : 'Simplifier et améliorer le style'}
+                {improving ? 'L’IA travaille…' : 'Améliorer et ajouter'}
               </button>
               <button
                 className="premise-icon-btn"
-                onClick={() => navigate('/storic/prompt/premise_improve')}
+                onClick={() => navigate('/storic/prompt/depth_improve')}
                 aria-label="Modifier le prompt de l'IA"
                 title="Modifier le prompt de l'IA"
               >
@@ -181,39 +201,39 @@ export default function Premise() {
               onClick={addAsIs}
               disabled={!draft.trim() || overLimit || busy}
             >
-              {adding ? 'Ajout…' : 'Ajouter sans modifier'}
+              {adding ? 'Ajout…' : 'Ajouter'}
             </button>
           </div>
         </div>
 
         {loading ? (
           <p className="premise-loading">Chargement…</p>
-        ) : premises.length === 0 ? (
-          <p className="premise-empty">Aucune prémisse pour cette histoire.</p>
+        ) : depths.length === 0 ? (
+          <p className="premise-empty">Aucune analyse de profondeur pour cette histoire.</p>
         ) : (
           <div className="premise-table">
             <div className="premise-head">
-              <span>Prémisse</span>
+              <span>Profondeur</span>
               <span>Note</span>
               <span />
             </div>
-            {premises.map(p => (
-              <div key={p.id} className="premise-row">
-                <span className="premise-text">{p.text}</span>
-                <span className="premise-score">{p.score}/20</span>
+            {depths.map(d => (
+              <div key={d.id} className="premise-row">
+                <span className="premise-text">{d.text}</span>
+                <span className="premise-score">{d.score}/20</span>
                 <div className="premise-actions">
                   <button
                     className="premise-icon-btn"
-                    onClick={() => openEditor(p)}
-                    aria-label="Modifier cette prémisse"
+                    onClick={() => openEditor(d)}
+                    aria-label="Modifier cette analyse"
                     title="Modifier"
                   >
                     <PencilIcon />
                   </button>
                   <button
                     className="premise-icon-btn danger"
-                    onClick={() => remove(p)}
-                    aria-label="Supprimer cette prémisse"
+                    onClick={() => remove(d)}
+                    aria-label="Supprimer cette analyse"
                     title="Supprimer"
                   >
                     <TrashIcon />
@@ -228,11 +248,11 @@ export default function Premise() {
       {editing && (
         <div className="premise-modal-backdrop" onClick={() => setEditing(null)}>
           <div className="premise-modal" onClick={e => e.stopPropagation()}>
-            <h2>Modifier la prémisse</h2>
+            <h2>Modifier l'analyse</h2>
 
-            <label className="premise-label" htmlFor="premise-edit-text">Prémisse</label>
+            <label className="premise-label" htmlFor="depth-edit-text">Profondeur</label>
             <textarea
-              id="premise-edit-text"
+              id="depth-edit-text"
               className="premise-input"
               value={editText}
               onChange={e => setEditText(e.target.value)}
@@ -242,9 +262,9 @@ export default function Premise() {
               {countWords(editText)} / {MAX_WORDS} mots
             </div>
 
-            <label className="premise-label" htmlFor="premise-edit-score">Note sur 20</label>
+            <label className="premise-label" htmlFor="depth-edit-score">Note sur 20</label>
             <input
-              id="premise-edit-score"
+              id="depth-edit-score"
               className="premise-score-input"
               type="number"
               min="0"

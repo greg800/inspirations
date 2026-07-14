@@ -19,6 +19,7 @@ import Profile from './pages/Profile.jsx'
 import JoinBubble from './pages/JoinBubble.jsx'
 import Storic from './pages/Storic.jsx'
 import Premise from './pages/Premise.jsx'
+import Depth from './pages/Depth.jsx'
 import AiPrompt from './pages/AiPrompt.jsx'
 import AiCosts from './pages/AiCosts.jsx'
 
@@ -43,8 +44,9 @@ export default function App() {
           <Route path="/join-bubble" element={<JoinBubble />} />
           <Route path="/storic" element={<Storic />} />
           {/* /storic/prompt avant /storic/:storyId — un segment statique doit primer */}
-          <Route path="/storic/prompt" element={<AiPrompt />} />
+          <Route path="/storic/prompt/:key" element={<AiPrompt />} />
           <Route path="/storic/:storyId" element={<Premise />} />
+          <Route path="/storic/:storyId/depth" element={<Depth />} />
           <Route path="/admin/ai-costs" element={<AiCosts />} />
         </Routes>
         <MobileBottomBar />

@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { useAuth } from '../lib/auth.jsx'
 import { useStickyActions } from '../lib/stickyActions.jsx'
 import './AiPrompt.css'
 
-const KEY = 'premise_improve'
-
 export default function AiPrompt() {
+  const { key } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
   const { setActions } = useStickyActions()
 
   const [content, setContent] = useState('')
   const [defaultContent, setDefaultContent] = useState('')
+  const [label, setLabel] = useState('')
   const [isCustom, setIsCustom] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -22,15 +22,17 @@ export default function AiPrompt() {
 
   useEffect(() => {
     if (!user) { navigate('/login'); return }
-    api.ai.getPrompt(KEY)
+    setLoading(true)
+    api.ai.getPrompt(key)
       .then(data => {
         setContent(data.content)
         setDefaultContent(data.defaultContent)
+        setLabel(data.label || '')
         setIsCustom(data.isCustom)
       })
       .catch(err => setError(err.message || 'Chargement impossible'))
       .finally(() => setLoading(false))
-  }, [user])
+  }, [user, key])
 
   useEffect(() => {
     setActions([{ label: 'Retour', ghost: true, onClick: () => navigate(-1) }])
@@ -42,7 +44,7 @@ export default function AiPrompt() {
     setError('')
     setSaving(true)
     try {
-      const data = await api.ai.savePrompt(KEY, content)
+      const data = await api.ai.savePrompt(key, content)
       setContent(data.content)
       setIsCustom(true)
       setSaved(true)
@@ -58,7 +60,7 @@ export default function AiPrompt() {
     if (!confirm('Revenir au prompt par défaut ? Votre version sera perdue.')) return
     setError('')
     try {
-      const data = await api.ai.resetPrompt(KEY)
+      const data = await api.ai.resetPrompt(key)
       setContent(data.content)
       setIsCustom(false)
     } catch (err) {
@@ -74,8 +76,9 @@ export default function AiPrompt() {
         <p className="prompt-eyebrow">Storic</p>
         <h1>Prompt de l'IA</h1>
         <p className="prompt-subtitle">
-          Ce texte est envoyé à Claude quand vous cliquez sur « Simplifier et améliorer le style ».
-          Votre prémisse lui est transmise ensuite, séparément.
+          {label
+            ? <>Ce texte est envoyé à Claude quand vous cliquez sur « {label} ». Votre propre texte lui est transmis ensuite, séparément.</>
+            : <>Ce texte est envoyé à Claude. Votre propre texte lui est transmis ensuite, séparément.</>}
         </p>
 
         {error && <p className="prompt-error">{error}</p>}

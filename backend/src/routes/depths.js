@@ -5,8 +5,8 @@ import { PROMPT_KEYS } from '../lib/prompts.js'
 const prisma = new PrismaClient()
 
 export default createStoryItemRouter({
-  delegate: prisma.premise,
-  promptKey: PROMPT_KEYS.PREMISE_IMPROVE,
-  feature: 'Prémisse — simplifier et améliorer le style',
-  notFound: 'Prémisse introuvable',
+  delegate: prisma.depth,
+  promptKey: PROMPT_KEYS.DEPTH_IMPROVE,
+  feature: 'Profondeur — améliorer et ajouter',
+  notFound: 'Analyse introuvable',
 })

@@ -100,6 +100,13 @@ export const api = {
     update: (storyId, id, data) => request(`/stories/${storyId}/premises/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (storyId, id) => request(`/stories/${storyId}/premises/${id}`, { method: 'DELETE' }),
   },
+  depths: {
+    list: (storyId) => request(`/stories/${storyId}/depths`),
+    create: (storyId, text) => request(`/stories/${storyId}/depths`, { method: 'POST', body: JSON.stringify({ text }) }),
+    improve: (storyId, text) => request(`/stories/${storyId}/depths/improve`, { method: 'POST', body: JSON.stringify({ text }) }),
+    update: (storyId, id, data) => request(`/stories/${storyId}/depths/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (storyId, id) => request(`/stories/${storyId}/depths/${id}`, { method: 'DELETE' }),
+  },
   ai: {
     getPrompt: (key) => request(`/ai/prompts/${key}`),
     savePrompt: (key, content) => request(`/ai/prompts/${key}`, { method: 'PUT', body: JSON.stringify({ content }) }),

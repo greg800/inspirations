@@ -36,6 +36,42 @@
   padding: 20px 0;
 }
 
+/* Bandeau « prémisse retenue » (page Profondeur) */
+.premise-retained {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.premise-retained-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.premise-retained-text {
+  font-size: 18px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.premise-retained-score {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.premise-retained-empty {
+  color: var(--color-text-secondary);
+}
+
 .premise-compose {
   margin-bottom: 32px;
 }

@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { requireAuth, requireAdmin } from '../middleware/auth.js'
 import { USD_PER_EUR } from '../lib/ai.js'
-import { PROMPT_KEYS, defaultPrompt } from '../lib/prompts.js'
+import { PROMPT_KEYS, PROMPT_LABELS, defaultPrompt } from '../lib/prompts.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -19,6 +19,7 @@ router.get('/prompts/:key', requireAuth, async (req, res) => {
   })
   res.json({
     key,
+    label: PROMPT_LABELS[key],
     content: custom?.content || defaultPrompt(key),
     isCustom: Boolean(custom),
     defaultContent: defaultPrompt(key),
@@ -38,7 +39,7 @@ router.put('/prompts/:key', requireAuth, async (req, res) => {
     update: { content: content.trim() },
     create: { userId: req.user.id, key, content: content.trim() },
   })
-  res.json({ key, content: prompt.content, isCustom: true, defaultContent: defaultPrompt(key) })
+  res.json({ key, label: PROMPT_LABELS[key], content: prompt.content, isCustom: true, defaultContent: defaultPrompt(key) })
 })
 
 // DELETE /api/ai/prompts/:key — revenir au prompt par défaut
@@ -47,7 +48,7 @@ router.delete('/prompts/:key', requireAuth, async (req, res) => {
   if (!KNOWN_KEYS.includes(key)) return res.status(404).json({ error: 'Prompt inconnu' })
 
   await prisma.aiPrompt.deleteMany({ where: { userId: req.user.id, key } })
-  res.json({ key, content: defaultPrompt(key), isCustom: false, defaultContent: defaultPrompt(key) })
+  res.json({ key, label: PROMPT_LABELS[key], content: defaultPrompt(key), isCustom: false, defaultContent: defaultPrompt(key) })
 })
 
 // GET /api/ai/costs — montants réellement engagés, agrégés par fonctionnalité (admin)
