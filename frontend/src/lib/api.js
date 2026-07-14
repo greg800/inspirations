@@ -87,6 +87,12 @@ export const api = {
     markRead: () => request('/notifications/read', { method: 'POST' }),
   },
   linkPreview: (url) => request(`/link-preview?url=${encodeURIComponent(url)}`),
+  stories: {
+    mine: () => request('/stories'),
+    create: (title) => request('/stories', { method: 'POST', body: JSON.stringify({ title }) }),
+    update: (id, title) => request(`/stories/${id}`, { method: 'PATCH', body: JSON.stringify({ title }) }),
+    delete: (id) => request(`/stories/${id}`, { method: 'DELETE' }),
+  },
   bubbles: {
     mine: () => request('/bubbles/mine'),
     create: (name) => request('/bubbles', { method: 'POST', body: JSON.stringify({ name }) }),

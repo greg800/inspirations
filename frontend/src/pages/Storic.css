@@ -1,0 +1,136 @@
+.storic-page {
+  padding: 32px 0 120px;
+}
+
+.storic-page h1 {
+  margin-bottom: 4px;
+}
+
+.storic-subtitle {
+  color: var(--color-text-secondary);
+  margin-bottom: 24px;
+}
+
+.storic-error {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.storic-loading,
+.storic-empty {
+  color: var(--color-text-secondary);
+  padding: 20px 0;
+}
+
+.storic-add-btn {
+  padding: 10px 18px;
+  margin-bottom: 16px;
+  background: var(--color-cta);
+  color: var(--color-cta-text);
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.storic-add-btn:hover {
+  background: var(--color-cta-hover);
+}
+
+.storic-table {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.storic-head,
+.storic-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 70px 44px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.storic-head {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.storic-row {
+  border-bottom: 1px solid var(--color-border);
+  cursor: default;
+  user-select: none;
+}
+
+.storic-row:last-child {
+  border-bottom: none;
+}
+
+.storic-row:hover {
+  background: var(--color-surface);
+}
+
+.storic-title {
+  font-weight: 600;
+}
+
+.storic-date,
+.storic-score {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.storic-muted {
+  color: var(--color-text-secondary);
+}
+
+.storic-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1.5px solid var(--color-cta);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 15px;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.storic-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.storic-delete-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Mobile : la colonne date passe à l'essentiel */
+@media (max-width: 600px) {
+  .storic-head,
+  .storic-row {
+    grid-template-columns: 1fr 90px 50px 40px;
+    gap: 8px;
+    padding: 12px 10px;
+  }
+}

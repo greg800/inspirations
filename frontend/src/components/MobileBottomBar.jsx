@@ -98,6 +98,11 @@ export default function MobileBottomBar() {
           {cta}
         </div>
       )}
+      {isGallery && user && (
+        <div className="mobile-bottom-cta">
+          <Link to="/storic" className="mobile-bottom-btn ghost">Créer une histoire</Link>
+        </div>
+      )}
     </div>
   )
 }

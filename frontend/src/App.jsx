@@ -17,6 +17,7 @@ import Admin from './pages/Admin.jsx'
 import Activity from './pages/Activity.jsx'
 import Profile from './pages/Profile.jsx'
 import JoinBubble from './pages/JoinBubble.jsx'
+import Storic from './pages/Storic.jsx'
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/activity" element={<Activity />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/join-bubble" element={<JoinBubble />} />
+          <Route path="/storic" element={<Storic />} />
         </Routes>
         <MobileBottomBar />
         <IOSInstallBanner />
