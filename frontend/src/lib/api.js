@@ -93,20 +93,15 @@ export const api = {
     update: (id, title) => request(`/stories/${id}`, { method: 'PATCH', body: JSON.stringify({ title }) }),
     delete: (id) => request(`/stories/${id}`, { method: 'DELETE' }),
   },
-  premises: {
-    list: (storyId) => request(`/stories/${storyId}/premises`),
-    create: (storyId, text) => request(`/stories/${storyId}/premises`, { method: 'POST', body: JSON.stringify({ text }) }),
-    improve: (storyId, text) => request(`/stories/${storyId}/premises/improve`, { method: 'POST', body: JSON.stringify({ text }) }),
-    update: (storyId, id, data) => request(`/stories/${storyId}/premises/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-    delete: (storyId, id) => request(`/stories/${storyId}/premises/${id}`, { method: 'DELETE' }),
+  // Générique : `path` est le sous-chemin de l'étape (premises, depths, problems…).
+  step: {
+    list: (path, storyId) => request(`/stories/${storyId}/${path}`),
+    create: (path, storyId, text) => request(`/stories/${storyId}/${path}`, { method: 'POST', body: JSON.stringify({ text }) }),
+    improve: (path, storyId, text) => request(`/stories/${storyId}/${path}/improve`, { method: 'POST', body: JSON.stringify({ text }) }),
+    update: (path, storyId, id, data) => request(`/stories/${storyId}/${path}/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (path, storyId, id) => request(`/stories/${storyId}/${path}/${id}`, { method: 'DELETE' }),
   },
-  depths: {
-    list: (storyId) => request(`/stories/${storyId}/depths`),
-    create: (storyId, text) => request(`/stories/${storyId}/depths`, { method: 'POST', body: JSON.stringify({ text }) }),
-    improve: (storyId, text) => request(`/stories/${storyId}/depths/improve`, { method: 'POST', body: JSON.stringify({ text }) }),
-    update: (storyId, id, data) => request(`/stories/${storyId}/depths/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-    delete: (storyId, id) => request(`/stories/${storyId}/depths/${id}`, { method: 'DELETE' }),
-  },
+  contextSummary: (storyId) => request(`/stories/${storyId}/context-summary`),
   ai: {
     getPrompt: (key) => request(`/ai/prompts/${key}`),
     savePrompt: (key, content) => request(`/ai/prompts/${key}`, { method: 'PUT', body: JSON.stringify({ content }) }),

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { useAuth } from '../lib/auth.jsx'
 import { useStickyActions } from '../lib/stickyActions.jsx'
-// Même agencement que la page Prémisse : on réutilise ses styles.
+import { stepByKey, stepIndex, STORIC_STEPS } from '../lib/storicSteps.js'
 import './Premise.css'
 
 const MAX_WORDS = 200
@@ -25,17 +25,22 @@ const TrashIcon = () => (
   </svg>
 )
 
-export default function Depth() {
-  const { storyId } = useParams()
+// `firstStep` : rendu à la racine /storic/:storyId (la prémisse), sans param d'étape.
+export default function StepPage({ firstStep }) {
+  const params = useParams()
+  const stepKey = firstStep ? 'premise' : params.stepKey
+  const storyId = params.storyId
+  const step = stepByKey(stepKey)
+  const index = stepIndex(stepKey)
+
   const { user } = useAuth()
   const navigate = useNavigate()
   const { setActions } = useStickyActions()
 
-  const [story, setStory] = useState(null)
-  // La prémisse retenue = celle qui a la meilleure note. Le serveur trie déjà
-  // par note décroissante, donc c'est la première de la liste.
-  const [topPremise, setTopPremise] = useState(null)
-  const [depths, setDepths] = useState([])
+  const [storyTitle, setStoryTitle] = useState('')
+  const [items, setItems] = useState([])
+  // Éléments retenus des étapes précédentes (bandeau « où vous en êtes »).
+  const [priorContext, setPriorContext] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -54,23 +59,53 @@ export default function Depth() {
 
   useEffect(() => {
     if (!user) { navigate('/login'); return }
-    Promise.all([api.premises.list(storyId), api.depths.list(storyId)])
-      .then(([premiseData, depthData]) => {
-        setStory(premiseData.story)
-        setTopPremise(premiseData.items[0] || null)
-        setDepths(depthData.items)
+    if (!step) { navigate('/storic'); return }
+
+    setLoading(true)
+    setError('')
+    setDraft('')
+
+    const calls = [api.step.list(step.path, storyId)]
+    // Le bandeau de contexte n'a de sens qu'à partir de la 2e étape.
+    if (index > 0) calls.push(api.contextSummary(storyId))
+
+    Promise.all(calls)
+      .then(([listData, summary]) => {
+        setStoryTitle(listData.story.title)
+        setItems(listData.items)
+        if (summary) {
+          // On ne garde que les étapes PRÉCÉDENTES qui ont un élément retenu.
+          const byKey = Object.fromEntries(summary.steps.map(s => [s.key, s.best]))
+          setPriorContext(
+            STORIC_STEPS.slice(0, index).map(s => ({
+              key: s.key,
+              label: s.label,
+              best: byKey[s.key] || null,
+            }))
+          )
+        } else {
+          setPriorContext([])
+        }
       })
       .catch(err => setError(err.message || 'Chargement impossible'))
       .finally(() => setLoading(false))
-  }, [storyId, user])
+  }, [stepKey, storyId, user])
 
   useEffect(() => {
-    setActions([{ label: 'Retour', ghost: true, onClick: () => navigate(-1) }])
+    const actions = []
+    if (step?.next) {
+      actions.push({
+        label: step.next.label,
+        onClick: () => navigate(`/storic/${storyId}/${step.next.key}`),
+      })
+    }
+    actions.push({ label: 'Retour', ghost: true, onClick: () => navigate(-1) })
+    setActions(actions)
     return () => setActions(null)
-  }, [])
+  }, [stepKey, storyId])
 
-  function insert(depth) {
-    setDepths(list => [...list, depth].sort((a, b) => b.score - a.score))
+  function insert(item) {
+    setItems(list => [...list, item].sort((a, b) => b.score - a.score))
     setDraft('')
   }
 
@@ -79,7 +114,7 @@ export default function Depth() {
     setError('')
     setAdding(true)
     try {
-      insert(await api.depths.create(storyId, draft))
+      insert(await api.step.create(step.path, storyId, draft))
     } catch (err) {
       setError(err.message || 'Ajout impossible')
     } finally {
@@ -92,7 +127,7 @@ export default function Depth() {
     setError('')
     setImproving(true)
     try {
-      insert(await api.depths.improve(storyId, draft))
+      insert(await api.step.improve(step.path, storyId, draft))
     } catch (err) {
       setError(err.message || "L'appel à l'IA a échoué")
     } finally {
@@ -100,22 +135,22 @@ export default function Depth() {
     }
   }
 
-  function openEditor(depth) {
-    setEditing(depth)
-    setEditText(depth.text)
-    setEditScore(depth.score)
+  function openEditor(item) {
+    setEditing(item)
+    setEditText(item.text)
+    setEditScore(item.score)
   }
 
   async function saveEdit() {
     if (!editText.trim() || saving) return
     setSaving(true)
     try {
-      const updated = await api.depths.update(storyId, editing.id, {
+      const updated = await api.step.update(step.path, storyId, editing.id, {
         text: editText,
         score: Number(editScore),
       })
-      setDepths(list =>
-        list.map(d => (d.id === updated.id ? updated : d)).sort((a, b) => b.score - a.score)
+      setItems(list =>
+        list.map(i => (i.id === updated.id ? updated : i)).sort((a, b) => b.score - a.score)
       )
       setEditing(null)
     } catch (err) {
@@ -126,50 +161,57 @@ export default function Depth() {
     }
   }
 
-  async function remove(depth) {
-    if (!confirm('Supprimer cette analyse ? Cette action est définitive.')) return
+  async function remove(item) {
+    if (!confirm('Supprimer cet élément ? Cette action est définitive.')) return
     try {
-      await api.depths.delete(storyId, depth.id)
-      setDepths(list => list.filter(d => d.id !== depth.id))
+      await api.step.delete(step.path, storyId, item.id)
+      setItems(list => list.filter(i => i.id !== item.id))
     } catch (err) {
       setError(err.message || 'Suppression impossible')
     }
   }
 
+  if (!step) return null
+
   return (
     <div className="premise-page">
       <div className="container">
-        <p className="premise-eyebrow">Storic{story ? ` — ${story.title}` : ''}</p>
-        <h1>Profondeur</h1>
-        <p className="premise-subtitle">
-          Si le champ des possibles est vaste, la prémisse est bonne. S'il est étroit,
-          c'est une piste stérile.
-        </p>
+        <p className="premise-eyebrow">Storic{storyTitle ? ` — ${storyTitle}` : ''}</p>
+        <h1>{step.title}</h1>
+        <p className="premise-subtitle">{step.subtitle}</p>
 
         {error && <p className="premise-error">{error}</p>}
 
-        {!loading && (
-          <div className="premise-retained">
-            <div className="premise-retained-label">Prémisse retenue</div>
-            {topPremise ? (
-              <>
-                <p className="premise-retained-text">{topPremise.text}</p>
-                <div className="premise-retained-score">{topPremise.score}/20</div>
-              </>
-            ) : (
-              <p className="premise-retained-empty">
-                Aucune prémisse pour cette histoire. Ajoutez-en une avant d'évaluer sa profondeur.
-              </p>
-            )}
+        {/* Où vous en êtes : les éléments retenus aux étapes précédentes */}
+        {!loading && index > 0 && (
+          <div className="step-context">
+            <div className="step-context-label">Où vous en êtes</div>
+            {priorContext.map(p => (
+              <div key={p.key} className="step-context-item">
+                <span className="step-context-step">{p.label}</span>
+                {p.best ? (
+                  <span className="step-context-text">
+                    {p.best.text} <span className="step-context-score">{p.best.score}/20</span>
+                  </span>
+                ) : (
+                  <span className="step-context-todo">à compléter</span>
+                )}
+              </div>
+            ))}
           </div>
         )}
+
+        {/* Aides pour bien remplir */}
+        <ul className="step-guidance">
+          {step.guidance.map((g, i) => <li key={i}>{g}</li>)}
+        </ul>
 
         <div className="premise-compose">
           <textarea
             className={`premise-input${overLimit ? ' over' : ''}`}
             value={draft}
             onChange={e => setDraft(e.target.value)}
-            placeholder="Décrivez la fertilité et la profondeur de cette prémisse : que rend-elle possible ?"
+            placeholder={step.placeholder}
             rows={5}
             disabled={busy}
           />
@@ -184,11 +226,11 @@ export default function Depth() {
                 onClick={improve}
                 disabled={!draft.trim() || overLimit || busy}
               >
-                {improving ? 'L’IA travaille…' : 'Améliorer et ajouter'}
+                {improving ? 'L’IA travaille…' : step.ctaImprove}
               </button>
               <button
                 className="premise-icon-btn"
-                onClick={() => navigate('/storic/prompt/depth_improve')}
+                onClick={() => navigate(`/storic/prompt/${step.promptKey}`)}
                 aria-label="Modifier le prompt de l'IA"
                 title="Modifier le prompt de l'IA"
               >
@@ -201,39 +243,39 @@ export default function Depth() {
               onClick={addAsIs}
               disabled={!draft.trim() || overLimit || busy}
             >
-              {adding ? 'Ajout…' : 'Ajouter'}
+              {adding ? 'Ajout…' : step.ctaAdd}
             </button>
           </div>
         </div>
 
         {loading ? (
           <p className="premise-loading">Chargement…</p>
-        ) : depths.length === 0 ? (
-          <p className="premise-empty">Aucune analyse de profondeur pour cette histoire.</p>
+        ) : items.length === 0 ? (
+          <p className="premise-empty">Rien pour cette étape pour l'instant.</p>
         ) : (
           <div className="premise-table">
             <div className="premise-head">
-              <span>Profondeur</span>
+              <span>{step.tableHeader}</span>
               <span>Note</span>
               <span />
             </div>
-            {depths.map(d => (
-              <div key={d.id} className="premise-row">
-                <span className="premise-text">{d.text}</span>
-                <span className="premise-score">{d.score}/20</span>
+            {items.map(item => (
+              <div key={item.id} className="premise-row">
+                <span className="premise-text">{item.text}</span>
+                <span className="premise-score">{item.score}/20</span>
                 <div className="premise-actions">
                   <button
                     className="premise-icon-btn"
-                    onClick={() => openEditor(d)}
-                    aria-label="Modifier cette analyse"
+                    onClick={() => openEditor(item)}
+                    aria-label="Modifier"
                     title="Modifier"
                   >
                     <PencilIcon />
                   </button>
                   <button
                     className="premise-icon-btn danger"
-                    onClick={() => remove(d)}
-                    aria-label="Supprimer cette analyse"
+                    onClick={() => remove(item)}
+                    aria-label="Supprimer"
                     title="Supprimer"
                   >
                     <TrashIcon />
@@ -248,11 +290,11 @@ export default function Depth() {
       {editing && (
         <div className="premise-modal-backdrop" onClick={() => setEditing(null)}>
           <div className="premise-modal" onClick={e => e.stopPropagation()}>
-            <h2>Modifier l'analyse</h2>
+            <h2>Modifier</h2>
 
-            <label className="premise-label" htmlFor="depth-edit-text">Profondeur</label>
+            <label className="premise-label" htmlFor="step-edit-text">{step.tableHeader}</label>
             <textarea
-              id="depth-edit-text"
+              id="step-edit-text"
               className="premise-input"
               value={editText}
               onChange={e => setEditText(e.target.value)}
@@ -262,9 +304,9 @@ export default function Depth() {
               {countWords(editText)} / {MAX_WORDS} mots
             </div>
 
-            <label className="premise-label" htmlFor="depth-edit-score">Note sur 20</label>
+            <label className="premise-label" htmlFor="step-edit-score">Note sur 20</label>
             <input
-              id="depth-edit-score"
+              id="step-edit-score"
               className="premise-score-input"
               type="number"
               min="0"

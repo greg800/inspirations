@@ -40,13 +40,103 @@ model Story {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  premises  Premise[]
-  depths    Depth[]
+  premises        Premise[]
+  depths          Depth[]
+  problems        Problem[]
+  principles      Principle[]
+  characters      Character[]
+  conflicts       Conflict[]
+  sequences       Sequence[]
+  transformations Transformation[]
+  dilemmas        Dilemma[]
+  receptions      Reception[]
 }
 
-// Une analyse de la profondeur / fertilité de la prémisse retenue.
-// Même forme qu'une prémisse : un texte et une note de 0 à 20.
+// Toutes les étapes du pipeline d'écriture ont la même forme : un texte, une
+// note de 0 à 20, rattachés à une histoire. Depth = profondeur / fertilité ;
+// les suivantes suivent la méthode (problèmes, principe directeur, personnage,
+// conflit, séquence de cause à effet, transformation, dilemme, réception).
 model Depth {
+  id        Int      @id @default(autoincrement())
+  text      String
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Problem {
+  id        Int      @id @default(autoincrement())
+  text      String
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Principle {
+  id        Int      @id @default(autoincrement())
+  text      String
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Character {
+  id        Int      @id @default(autoincrement())
+  text      String
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Conflict {
+  id        Int      @id @default(autoincrement())
+  text      String
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Sequence {
+  id        Int      @id @default(autoincrement())
+  text      String
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Transformation {
+  id        Int      @id @default(autoincrement())
+  text      String
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Dilemma {
+  id        Int      @id @default(autoincrement())
+  text      String
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Reception {
   id        Int      @id @default(autoincrement())
   text      String
   score     Int      @default(10)

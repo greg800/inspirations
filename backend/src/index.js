@@ -17,6 +17,15 @@ import bubblesRouter from './routes/bubbles.js'
 import storiesRouter from './routes/stories.js'
 import premisesRouter from './routes/premises.js'
 import depthsRouter from './routes/depths.js'
+import problemsRouter from './routes/problems.js'
+import principleRouter from './routes/principle.js'
+import characterRouter from './routes/character.js'
+import conflictRouter from './routes/conflict.js'
+import sequenceRouter from './routes/sequence.js'
+import transformationRouter from './routes/transformation.js'
+import dilemmaRouter from './routes/dilemma.js'
+import receptionRouter from './routes/reception.js'
+import storyContextRouter from './routes/storyContext.js'
 import aiRouter from './routes/ai.js'
 
 const app = express()
@@ -45,6 +54,15 @@ app.use('/api/bubbles', bubblesRouter)
 app.use('/api/stories', storiesRouter)
 app.use('/api/stories/:storyId/premises', premisesRouter)
 app.use('/api/stories/:storyId/depths', depthsRouter)
+app.use('/api/stories/:storyId/problems', problemsRouter)
+app.use('/api/stories/:storyId/principle', principleRouter)
+app.use('/api/stories/:storyId/character', characterRouter)
+app.use('/api/stories/:storyId/conflict', conflictRouter)
+app.use('/api/stories/:storyId/sequence', sequenceRouter)
+app.use('/api/stories/:storyId/transformation', transformationRouter)
+app.use('/api/stories/:storyId/dilemma', dilemmaRouter)
+app.use('/api/stories/:storyId/reception', receptionRouter)
+app.use('/api/stories/:storyId/context-summary', storyContextRouter)
 app.use('/api/ai', aiRouter)
 
 // En production : servir le frontend buildé

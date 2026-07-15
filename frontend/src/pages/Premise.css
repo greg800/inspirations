@@ -36,44 +36,97 @@
   padding: 20px 0;
 }
 
-/* Bandeau « prémisse retenue » (page Profondeur) */
-.premise-retained {
+/* Bandeau « où vous en êtes » : éléments retenus des étapes précédentes */
+.step-context {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-left: 3px solid var(--color-accent);
   border-radius: var(--radius);
   padding: 16px 20px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
-.premise-retained-label {
+.step-context-label {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
-.premise-retained-text {
-  font-size: 18px;
-  line-height: 1.5;
-  font-weight: 600;
-}
-
-.premise-retained-score {
-  margin-top: 8px;
+.step-context-item {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--color-border);
   font-size: 14px;
+  line-height: 1.5;
+}
+
+.step-context-item:first-of-type {
+  border-top: none;
+}
+
+.step-context-step {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.step-context-score {
   font-weight: 700;
   color: var(--color-accent);
+  white-space: nowrap;
 }
 
-.premise-retained-empty {
+.step-context-todo {
   color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* Aides pour bien remplir */
+.step-guidance {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 16px 20px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+}
+
+.step-guidance li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+.step-guidance li:last-child {
+  margin-bottom: 0;
+}
+
+.step-guidance li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
 }
 
 .premise-compose {
   margin-bottom: 32px;
+}
+
+@media (max-width: 600px) {
+  .step-context-item {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
 }
 
 .premise-input {
