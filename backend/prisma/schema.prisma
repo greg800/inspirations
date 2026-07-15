@@ -59,6 +59,7 @@ model Story {
 model Depth {
   id        Int      @id @default(autoincrement())
   text      String
+  summary   String?
   score     Int      @default(10)
   storyId   Int
   story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -69,6 +70,7 @@ model Depth {
 model Problem {
   id        Int      @id @default(autoincrement())
   text      String
+  summary   String?
   score     Int      @default(10)
   storyId   Int
   story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -79,6 +81,7 @@ model Problem {
 model Principle {
   id        Int      @id @default(autoincrement())
   text      String
+  summary   String?
   score     Int      @default(10)
   storyId   Int
   story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -89,6 +92,7 @@ model Principle {
 model Character {
   id        Int      @id @default(autoincrement())
   text      String
+  summary   String?
   score     Int      @default(10)
   storyId   Int
   story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -99,6 +103,7 @@ model Character {
 model Conflict {
   id        Int      @id @default(autoincrement())
   text      String
+  summary   String?
   score     Int      @default(10)
   storyId   Int
   story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -109,6 +114,7 @@ model Conflict {
 model Sequence {
   id        Int      @id @default(autoincrement())
   text      String
+  summary   String?
   score     Int      @default(10)
   storyId   Int
   story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -119,6 +125,7 @@ model Sequence {
 model Transformation {
   id        Int      @id @default(autoincrement())
   text      String
+  summary   String?
   score     Int      @default(10)
   storyId   Int
   story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -129,6 +136,7 @@ model Transformation {
 model Dilemma {
   id        Int      @id @default(autoincrement())
   text      String
+  summary   String?
   score     Int      @default(10)
   storyId   Int
   story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -139,6 +147,7 @@ model Dilemma {
 model Reception {
   id        Int      @id @default(autoincrement())
   text      String
+  summary   String?
   score     Int      @default(10)
   storyId   Int
   story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -150,6 +159,7 @@ model Reception {
 model Premise {
   id        Int      @id @default(autoincrement())
   text      String
+  summary   String?
   score     Int      @default(10)
   storyId   Int
   story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)

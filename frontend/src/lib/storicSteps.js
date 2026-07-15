@@ -215,3 +215,11 @@ export function stepByKey(key) {
 export function stepIndex(key) {
   return STORIC_STEPS.findIndex(s => s.key === key)
 }
+
+// La prémisse et le principe directeur s'affichent en entier dans « Où vous en
+// êtes » ; toutes les autres étapes y montrent leur phrase de synthèse.
+const NO_SUMMARY = new Set(['premise', 'principle'])
+
+export function stepHasSummary(key) {
+  return !NO_SUMMARY.has(key)
+}

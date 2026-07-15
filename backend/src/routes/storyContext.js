@@ -22,7 +22,10 @@ router.get('/', requireAuth, async (req, res) => {
       where: { storyId },
       orderBy: [{ score: 'desc' }, { createdAt: 'desc' }],
     })
-    steps.push({ key: step.key, best: best ? { text: best.text, score: best.score } : null })
+    steps.push({
+      key: step.key,
+      best: best ? { text: best.text, score: best.score, summary: best.summary } : null,
+    })
   }
 
   res.json({ story: { id: story.id, title: story.title }, steps })

@@ -1,4 +1,5 @@
 import { PROMPT_KEYS } from './prompts.js'
+import { summarizeText } from './ai.js'
 
 /**
  * Le pipeline d'écriture, dans l'ordre. Chaque étape s'appuie sur les précédentes.
@@ -95,6 +96,15 @@ export function stepByKey(key) {
   return STEPS.find(s => s.key === key)
 }
 
+// Étapes SANS phrase de synthèse dans « Où vous en êtes » : la prémisse et le
+// principe directeur s'y affichent en entier (une seule phrase, déjà concise).
+// Toutes les autres produisent et affichent une synthèse.
+const NO_SUMMARY = new Set(['premise', 'principle'])
+
+export function stepHasSummary(key) {
+  return !NO_SUMMARY.has(key)
+}
+
 async function bestOf(prisma, model, storyId) {
   return prisma[model].findFirst({
     where: { storyId },
@@ -163,4 +173,27 @@ export function buildUserMessage(context, text) {
     '---',
     `Texte à réécrire :\n${text}`,
   ].join('\n\n')
+}
+
+/**
+ * Garantit que chaque texte affichable dans « Où vous en êtes » a bien sa phrase
+ * de synthèse : parcourt les étapes concernées et génère la synthèse manquante
+ * (texte ajouté « tel quel », ou antérieur à cette fonctionnalité). Appelé en
+ * arrière-plan à chaque « améliorer et ajouter », sans bloquer la réponse.
+ */
+export async function backfillSummaries(prisma, storyId, userId) {
+  for (const step of STEPS) {
+    if (!stepHasSummary(step.key)) continue
+    const rows = await prisma[step.model].findMany({
+      where: { storyId, summary: null },
+    })
+    for (const row of rows) {
+      try {
+        const summary = await summarizeText(row.text, userId)
+        await prisma[step.model].update({ where: { id: row.id }, data: { summary } })
+      } catch (err) {
+        console.error(`[backfill ${step.key} #${row.id}]`, err.message)
+      }
+    }
+  }
 }

@@ -14,6 +14,7 @@ export default function AiPrompt() {
   const [content, setContent] = useState('')
   const [defaultContent, setDefaultContent] = useState('')
   const [label, setLabel] = useState('')
+  const [producesSummary, setProducesSummary] = useState(false)
   const [isCustom, setIsCustom] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -28,6 +29,7 @@ export default function AiPrompt() {
         setContent(data.content)
         setDefaultContent(data.defaultContent)
         setLabel(data.label || '')
+        setProducesSummary(Boolean(data.producesSummary))
         setIsCustom(data.isCustom)
       })
       .catch(err => setError(err.message || 'Chargement impossible'))
@@ -83,6 +85,10 @@ export default function AiPrompt() {
           Le contexte de l'histoire — titre, éléments retenus aux étapes précédentes, textes
           déjà écrits à cette étape — lui est transmis <strong>automatiquement</strong>, suivi de
           votre texte. Vous n'avez pas à les recopier ici : dites seulement à Claude quoi en faire.
+          {producesSummary && (
+            <> Une <strong>phrase de synthèse</strong> est aussi produite automatiquement dans le
+            même appel, pour la zone « Où vous en êtes » : vous n'avez pas à la demander.</>
+          )}
         </p>
 
         {error && <p className="prompt-error">{error}</p>}

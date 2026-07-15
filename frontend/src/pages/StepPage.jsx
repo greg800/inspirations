@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { useAuth } from '../lib/auth.jsx'
 import { useStickyActions } from '../lib/stickyActions.jsx'
-import { stepByKey, stepIndex, STORIC_STEPS } from '../lib/storicSteps.js'
+import { stepByKey, stepIndex, stepHasSummary, STORIC_STEPS } from '../lib/storicSteps.js'
 import './Premise.css'
 
 const MAX_WORDS = 200
@@ -52,6 +52,16 @@ export default function StepPage({ firstStep }) {
   const [editText, setEditText] = useState('')
   const [editScore, setEditScore] = useState(10)
   const [saving, setSaving] = useState(false)
+
+  // Étapes du bandeau « où vous en êtes » dont on affiche le détail complet.
+  const [expanded, setExpanded] = useState(() => new Set())
+  function toggleExpanded(key) {
+    setExpanded(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
 
   const words = countWords(draft)
   const overLimit = words > MAX_WORDS
@@ -182,22 +192,39 @@ export default function StepPage({ firstStep }) {
 
         {error && <p className="premise-error">{error}</p>}
 
-        {/* Où vous en êtes : les éléments retenus aux étapes précédentes */}
+        {/* Où vous en êtes : les éléments retenus aux étapes précédentes.
+            Synthèse (avec bascule vers le détail) partout sauf prémisse et
+            principe directeur, qui s'affichent en entier. */}
         {!loading && index > 0 && (
           <div className="step-context">
             <div className="step-context-label">Où vous en êtes</div>
-            {priorContext.map(p => (
-              <div key={p.key} className="step-context-item">
-                <span className="step-context-step">{p.label}</span>
-                {p.best ? (
-                  <span className="step-context-text">
-                    {p.best.text} <span className="step-context-score">{p.best.score}/20</span>
-                  </span>
-                ) : (
-                  <span className="step-context-todo">à compléter</span>
-                )}
-              </div>
-            ))}
+            {priorContext.map(p => {
+              const useSummary = stepHasSummary(p.key) && p.best?.summary
+              const isOpen = expanded.has(p.key)
+              return (
+                <div key={p.key} className="step-context-item">
+                  <span className="step-context-step">{p.label}</span>
+                  {p.best ? (
+                    <span className="step-context-text">
+                      {useSummary && !isOpen ? p.best.summary : p.best.text}
+                      {' '}
+                      <span className="step-context-score">{p.best.score}/20</span>
+                      {useSummary && (
+                        <button
+                          type="button"
+                          className="step-context-toggle"
+                          onClick={() => toggleExpanded(p.key)}
+                        >
+                          {isOpen ? "n'afficher que la synthèse" : 'voir le détail'}
+                        </button>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="step-context-todo">à compléter</span>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
 

@@ -85,6 +85,25 @@
   font-style: italic;
 }
 
+/* Bascule synthèse / détail dans « où vous en êtes » */
+.step-context-toggle {
+  display: block;
+  margin-top: 4px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-cta);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.step-context-toggle:hover {
+  color: var(--color-accent);
+}
+
 /* Aides pour bien remplir */
 .step-guidance {
   list-style: none;

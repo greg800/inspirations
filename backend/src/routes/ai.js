@@ -3,11 +3,18 @@ import { PrismaClient } from '@prisma/client'
 import { requireAuth, requireAdmin } from '../middleware/auth.js'
 import { USD_PER_EUR } from '../lib/ai.js'
 import { PROMPT_KEYS, PROMPT_LABELS, defaultPrompt } from '../lib/prompts.js'
+import { STEPS, stepHasSummary } from '../lib/steps.js'
 
 const router = Router()
 const prisma = new PrismaClient()
 
 const KNOWN_KEYS = Object.values(PROMPT_KEYS)
+
+// Un prompt produit-il une synthèse ? (dépend de l'étape qui l'utilise)
+function promptProducesSummary(promptKey) {
+  const step = STEPS.find(s => s.promptKey === promptKey)
+  return step ? stepHasSummary(step.key) : false
+}
 
 // GET /api/ai/prompts/:key — prompt de l'utilisateur, ou le prompt par défaut
 router.get('/prompts/:key', requireAuth, async (req, res) => {
@@ -23,6 +30,7 @@ router.get('/prompts/:key', requireAuth, async (req, res) => {
     content: custom?.content || defaultPrompt(key),
     isCustom: Boolean(custom),
     defaultContent: defaultPrompt(key),
+    producesSummary: promptProducesSummary(key),
   })
 })
 
