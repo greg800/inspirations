@@ -271,10 +271,6 @@
 
 .premise-head,
 .premise-row {
-  display: grid;
-  grid-template-columns: 1fr 70px 92px;
-  align-items: center;
-  gap: 12px;
   padding: 14px;
 }
 
@@ -288,6 +284,15 @@
 
 .premise-row {
   border-bottom: 1px solid var(--color-border);
+}
+
+/* Première ligne d'une entrée : note à gauche, actions à droite. Le texte
+   passe dessous et occupe toute la largeur. */
+.premise-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
 }
 
 .premise-row:last-child {
@@ -310,7 +315,7 @@
 .premise-actions {
   display: flex;
   gap: 6px;
-  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .premise-actions .premise-icon-btn {
@@ -378,8 +383,6 @@
 @media (max-width: 600px) {
   .premise-head,
   .premise-row {
-    grid-template-columns: 1fr 52px 80px;
-    gap: 8px;
     padding: 12px 10px;
   }
 

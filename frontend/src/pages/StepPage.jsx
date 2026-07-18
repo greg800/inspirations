@@ -314,33 +314,33 @@ export default function StepPage({ firstStep }) {
           <p className="premise-empty">Rien pour cette étape pour l'instant.</p>
         ) : (
           <div className="premise-table">
-            <div className="premise-head">
-              <span>{step.tableHeader}</span>
-              <span>Note</span>
-              <span />
-            </div>
+            <div className="premise-head">{step.tableHeader}</div>
             {items.map(item => (
               <div key={item.id} className="premise-row">
-                <span className="premise-text">{item.text}</span>
-                <span className="premise-score">{item.score}/20</span>
-                <div className="premise-actions">
-                  <button
-                    className="premise-icon-btn"
-                    onClick={() => openEditor(item)}
-                    aria-label="Modifier"
-                    title="Modifier"
-                  >
-                    <PencilIcon />
-                  </button>
-                  <button
-                    className="premise-icon-btn danger"
-                    onClick={() => remove(item)}
-                    aria-label="Supprimer"
-                    title="Supprimer"
-                  >
-                    <TrashIcon />
-                  </button>
+                {/* Note et actions sur une première ligne, pour laisser le
+                    texte occuper toute la largeur en dessous. */}
+                <div className="premise-row-meta">
+                  <span className="premise-score">{item.score}/20</span>
+                  <div className="premise-actions">
+                    <button
+                      className="premise-icon-btn"
+                      onClick={() => openEditor(item)}
+                      aria-label="Modifier"
+                      title="Modifier"
+                    >
+                      <PencilIcon />
+                    </button>
+                    <button
+                      className="premise-icon-btn danger"
+                      onClick={() => remove(item)}
+                      aria-label="Supprimer"
+                      title="Supprimer"
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
                 </div>
+                <p className="premise-text">{item.text}</p>
               </div>
             ))}
           </div>
