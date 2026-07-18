@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { useAuth } from '../lib/auth.jsx'
 import { useStickyActions } from '../lib/stickyActions.jsx'
-import { stepByKey, stepIndex, stepHasSummary, STORIC_STEPS } from '../lib/storicSteps.js'
+import StepArrows from '../components/StepArrows.jsx'
+import {
+  stepByKey, stepIndex, stepHasSummary, stepsOfBlock, stepPath, blockProgress,
+  STORIC_STEPS, STORIC_BLOCKS,
+} from '../lib/storicSteps.js'
 import './Premise.css'
 
 function countWords(text) {
@@ -33,12 +37,15 @@ export default function StepPage({ firstStep }) {
 
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { setActions } = useStickyActions()
+  const { setTrail } = useStickyActions()
 
   const [storyTitle, setStoryTitle] = useState('')
   const [items, setItems] = useState([])
   // Éléments retenus des étapes précédentes (bandeau « où vous en êtes »).
   const [priorContext, setPriorContext] = useState([])
+  // Clés des étapes qui portent au moins un élément — nourrit les deux fils
+  // d'Ariane (blocs en haut, étapes du bloc courant en bas).
+  const [filled, setFilled] = useState(() => new Set())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -71,45 +78,70 @@ export default function StepPage({ firstStep }) {
     setLoading(true)
     setError('')
     setDraft('')
+    // Sans cela, le temps du chargement, la liste de l'étape quittée resterait
+    // affichée et marquerait à tort la nouvelle étape comme renseignée.
+    setItems([])
 
-    const calls = [api.step.list(step.path, storyId)]
-    // Le bandeau de contexte n'a de sens qu'à partir de la 2e étape.
-    if (index > 0) calls.push(api.contextSummary(storyId))
-
-    Promise.all(calls)
+    // Le résumé sert au bandeau « où vous en êtes » ET à l'avancement des deux
+    // fils d'Ariane : on le charge à chaque étape, y compris la première.
+    Promise.all([api.step.list(step.path, storyId), api.contextSummary(storyId)])
       .then(([listData, summary]) => {
         setStoryTitle(listData.story.title)
         setItems(listData.items)
-        if (summary) {
-          // On ne garde que les étapes PRÉCÉDENTES qui ont un élément retenu.
-          const byKey = Object.fromEntries(summary.steps.map(s => [s.key, s.best]))
-          setPriorContext(
-            STORIC_STEPS.slice(0, index).map(s => ({
-              key: s.key,
-              label: s.label,
-              best: byKey[s.key] || null,
-            }))
-          )
-        } else {
-          setPriorContext([])
-        }
+
+        const byKey = Object.fromEntries(summary.steps.map(s => [s.key, s.best]))
+        setFilled(new Set(summary.steps.filter(s => s.best).map(s => s.key)))
+        // Le bandeau ne montre que les étapes PRÉCÉDENTES.
+        setPriorContext(
+          STORIC_STEPS.slice(0, index).map(s => ({
+            key: s.key,
+            label: s.label,
+            best: byKey[s.key] || null,
+          }))
+        )
       })
       .catch(err => setError(err.message || 'Chargement impossible'))
       .finally(() => setLoading(false))
   }, [stepKey, storyId, user])
 
+  // Avancement affiché : ce qu'a renvoyé le serveur, corrigé en direct par ce
+  // que l'utilisateur vient d'ajouter ou de supprimer à l'étape courante.
+  const filledNow = useMemo(() => {
+    const set = new Set(filled)
+    if (items.length > 0) set.add(stepKey)
+    else set.delete(stepKey)
+    return set
+  }, [filled, items.length, stepKey])
+
+  // Fil d'Ariane du haut : les 7 grands blocs de la méthode.
+  const blockTrail = useMemo(() => STORIC_BLOCKS.map(block => ({
+    key: block.key,
+    label: block.letter,
+    title: block.pending ? `${block.label} — à venir` : block.label,
+    progress: blockProgress(block.key, filledNow),
+    active: block.key === step?.block,
+    disabled: !!block.pending,
+    // Un bloc mène à sa première étape. Les blocs à venir n'en ont aucune.
+    onClick: () => {
+      const first = stepsOfBlock(block.key)[0]
+      if (first) navigate(stepPath(storyId, first.key))
+    },
+  })), [filledNow, step?.block, storyId])
+
+  // Fil d'Ariane du bas : les étapes du bloc courant, numérotées.
+  const stepTrail = useMemo(() => stepsOfBlock(step?.block).map((s, i) => ({
+    key: s.key,
+    label: String(i + 1),
+    title: s.label,
+    progress: filledNow.has(s.key) ? 1 : 0,
+    active: s.key === stepKey,
+    onClick: () => navigate(stepPath(storyId, s.key)),
+  })), [filledNow, step?.block, stepKey, storyId])
+
   useEffect(() => {
-    const actions = []
-    if (step?.next) {
-      actions.push({
-        label: step.next.label,
-        onClick: () => navigate(`/storic/${storyId}/${step.next.key}`),
-      })
-    }
-    actions.push({ label: 'Retour', ghost: true, onClick: () => navigate(-1) })
-    setActions(actions)
-    return () => setActions(null)
-  }, [stepKey, storyId])
+    setTrail({ items: stepTrail, ariaLabel: 'Étapes de ce bloc' })
+    return () => setTrail(null)
+  }, [stepTrail])
 
   function insert(item) {
     setItems(list => [...list, item].sort((a, b) => b.score - a.score))
@@ -183,6 +215,10 @@ export default function StepPage({ firstStep }) {
   return (
     <div className="premise-page">
       <div className="container">
+        {/* Les 7 grands blocs de la méthode. Chaque flèche se remplit de vert
+            à proportion des étapes déjà renseignées pour cette histoire. */}
+        <StepArrows items={blockTrail} className="trail-blocks" ariaLabel="Blocs de la méthode" />
+
         <p className="premise-eyebrow">Storic{storyTitle ? ` — ${storyTitle}` : ''}</p>
         <h1>{step.title}</h1>
         <p className="premise-subtitle">{step.subtitle}</p>

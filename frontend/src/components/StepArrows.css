@@ -1,0 +1,112 @@
+/* Fil d'Ariane en flèches imbriquées.
+   Chaque segment est un chevron : pointe à droite, encoche à gauche pour
+   recevoir la pointe du précédent. Un chevauchement négatif les emboîte. */
+
+.arrow-trail {
+  --notch: 10px;
+  --gap: 3px;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+}
+
+.arrow-seg {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 30px;
+  margin-left: calc(var(--gap) - var(--notch));
+  padding: 0 var(--notch) 0 calc(var(--notch) + 2px);
+  border: none;
+  background: var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  overflow: hidden;
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--notch)) 0,
+    100% 50%,
+    calc(100% - var(--notch)) 100%,
+    0 100%,
+    var(--notch) 50%
+  );
+}
+
+/* La première flèche n'a personne à recevoir : bord gauche droit. */
+.arrow-seg.first {
+  margin-left: 0;
+  padding-left: 10px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--notch)) 0,
+    100% 50%,
+    calc(100% - var(--notch)) 100%,
+    0 100%
+  );
+}
+
+/* Remplissage vert, de la gauche vers la droite, au prorata de l'avancement. */
+.arrow-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--color-progress);
+  transition: width 0.3s ease;
+}
+
+.arrow-label {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arrow-seg:hover:not(.disabled) {
+  color: var(--color-text);
+}
+
+/* Étape courante : soulignée par un liseré, texte plein contraste. */
+.arrow-seg.active {
+  color: var(--color-cta);
+}
+
+.arrow-seg.active .arrow-label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+}
+
+/* Bloc pas encore développé : présent sur la carte, mais inerte. */
+.arrow-seg.disabled {
+  cursor: default;
+  color: var(--color-text-secondary);
+  opacity: 0.55;
+}
+
+/* Sur petit écran, dix flèches doivent tenir sur une ligne : on rétrécit
+   l'encoche et les marges intérieures pour laisser la place à l'étiquette. */
+@media (max-width: 600px) {
+  .arrow-trail {
+    --notch: 6px;
+    --gap: 2px;
+  }
+
+  .arrow-seg {
+    height: 28px;
+    padding: 0 3px 0 calc(var(--notch) + 1px);
+    font-size: 11px;
+    letter-spacing: 0;
+    text-align: center;
+  }
+
+  .arrow-seg.first {
+    padding-left: 4px;
+  }
+}

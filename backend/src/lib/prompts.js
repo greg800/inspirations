@@ -13,6 +13,13 @@ export const PROMPT_KEYS = {
   TRANSFORMATION_IMPROVE: 'transformation_improve',
   DILEMMA_IMPROVE: 'dilemma_improve',
   RECEPTION_IMPROVE: 'reception_improve',
+  WEAKNESS_IMPROVE: 'weakness_improve',
+  DESIRE_IMPROVE: 'desire_improve',
+  ADVERSARY_IMPROVE: 'adversary_improve',
+  PLAN_IMPROVE: 'plan_improve',
+  CONFRONTATION_IMPROVE: 'confrontation_improve',
+  AWARENESS_IMPROVE: 'awareness_improve',
+  EQUILIBRIUM_IMPROVE: 'equilibrium_improve',
 }
 
 // Libellés affichés sur la page d'édition du prompt.
@@ -27,6 +34,13 @@ export const PROMPT_LABELS = {
   [PROMPT_KEYS.TRANSFORMATION_IMPROVE]: 'Améliorer et ajouter (transformation du héros)',
   [PROMPT_KEYS.DILEMMA_IMPROVE]: 'Améliorer et ajouter (dilemme moral)',
   [PROMPT_KEYS.RECEPTION_IMPROVE]: 'Améliorer et ajouter (réception du public)',
+  [PROMPT_KEYS.WEAKNESS_IMPROVE]: 'Améliorer et ajouter (faiblesse et besoin)',
+  [PROMPT_KEYS.DESIRE_IMPROVE]: 'Améliorer et ajouter (désir)',
+  [PROMPT_KEYS.ADVERSARY_IMPROVE]: 'Améliorer et ajouter (adversaire)',
+  [PROMPT_KEYS.PLAN_IMPROVE]: 'Améliorer et ajouter (plan du héros)',
+  [PROMPT_KEYS.CONFRONTATION_IMPROVE]: 'Améliorer et ajouter (confrontation finale)',
+  [PROMPT_KEYS.AWARENESS_IMPROVE]: 'Améliorer et ajouter (prise de conscience)',
+  [PROMPT_KEYS.EQUILIBRIUM_IMPROVE]: 'Améliorer et ajouter (nouvel équilibre)',
 }
 
 // Rappel commun sur le contexte, en tête de chaque prompt.
@@ -192,6 +206,118 @@ Réécris la note de réception ci-dessous en respectant ces règles :
 3. Appuie-toi sur tout ce qui a été établi aux étapes précédentes.
 4. Une langue simple et directe.
 5. Ne change pas l'analyse : tu l'affines.
+
+Réponds UNIQUEMENT par la note réécrite. Pas de guillemets, pas de préambule, pas de commentaire.`,
+
+  [PROMPT_KEYS.WEAKNESS_IMPROVE]: `Tu es un scénariste expérimenté. On travaille la première des sept étapes de la structure narrative : faiblesse et besoin.
+
+Le héros a des faiblesses importantes qu'il tentera de supprimer au fil de l'histoire. Il a DEUX besoins. Le besoin psychologique : régler un défaut qui le fait souffrir lui. Le besoin moral : apprendre à faire le bien, c'est-à-dire à ne plus faire souffrir les autres. Règle qui tranche : il n'y a besoin moral QUE si le héros blesse au moins un autre personnage au début de l'histoire. Beaucoup d'auteurs croient avoir donné une faiblesse morale à leur héros alors qu'elle n'est que psychologique.
+
+${CONTEXT_NOTE}
+
+Réécris la note ci-dessous en respectant ces règles :
+
+1. Nomme la faiblesse, puis le besoin psychologique, puis le besoin moral.
+2. Pour le besoin moral, montre CONCRÈTEMENT qui le héros blesse au début de l'histoire. S'il ne blesse personne, dis-le franchement : il n'y a alors pas de besoin moral, seulement un besoin psychologique.
+3. Construis dans cet ordre : besoin psychologique → faiblesse morale qui en découle → besoin moral.
+4. Reste cohérent avec le personnage, la transformation et le conflit déjà retenus.
+5. Une langue simple et incarnée. Ne change pas la faiblesse : tu la précises.
+
+Réponds UNIQUEMENT par la note réécrite. Pas de guillemets, pas de préambule, pas de commentaire.`,
+
+  [PROMPT_KEYS.DESIRE_IMPROVE]: `Tu es un scénariste expérimenté. On travaille la deuxième étape de la structure narrative : le désir.
+
+Le désir, c'est ce que le héros veut obtenir à tout prix. C'est la piste que le public suit d'un bout à l'autre. Le désir découle du besoin — un lion a besoin de manger, il voit une antilope, il désire l'attraper. Mais désir et besoin ne sont pas au même niveau : le désir est ce que le public croit être le sujet de l'histoire, la surface ; le besoin reste sous la surface, invisible, et c'est le vrai sujet.
+
+${CONTEXT_NOTE}
+
+Réécris la formulation du désir ci-dessous en respectant ces règles :
+
+1. Une seule ligne de désir. Pas deux objectifs concurrents.
+2. Le désir doit être PRÉCIS : un objectif qu'on peut voir atteint ou manqué, pas une aspiration vague.
+3. Il doit pouvoir être accompli à la fin de l'histoire.
+4. Montre qu'il découle du besoin établi à l'étape précédente, tout en restant distinct de lui.
+5. Une langue simple et concrète. Ne change pas le désir : tu le rends plus net.
+
+Réponds UNIQUEMENT par le désir réécrit. Pas de guillemets, pas de préambule, pas de commentaire.`,
+
+  [PROMPT_KEYS.ADVERSARY_IMPROVE]: `Tu es un scénariste expérimenté. On travaille la troisième étape de la structure narrative : l'adversaire.
+
+L'adversaire n'incarne pas forcément le mal : c'est un concurrent qui veut le MÊME objectif que le héros. Héros et adversaire se battent pour imposer leur version de la réalité. Méthode : partir de l'objectif du héros — toute personne cherchant à empêcher qu'il l'atteigne est un adversaire. Comme au tennis, une partie n'est intéressante qu'avec deux excellents joueurs sur le terrain. On gagne à multiplier les adversaires : un principal et deux secondaires, car quatre personnages produisent six relations là où un adversaire unique n'en produit qu'une.
+
+${CONTEXT_NOTE}
+
+Réécris la description ci-dessous en respectant ces règles :
+
+1. Montre que l'adversaire vise le même objectif que le héros, et pourquoi il a de bonnes raisons de le vouloir.
+2. Fais-en un joueur de la force du héros, voire supérieure : un adversaire faible tue l'histoire.
+3. Donne-lui ses cinq attributs propres : faiblesse, besoin, désir, valeurs, transformation.
+4. Si des adversaires secondaires apparaissent, nomme-les et dis ce qu'ils ajoutent au réseau de conflits.
+5. Une langue concrète et incarnée. Ne change pas l'adversaire : tu l'approfondis.
+
+Réponds UNIQUEMENT par la description réécrite. Pas de guillemets, pas de préambule, pas de commentaire.`,
+
+  [PROMPT_KEYS.PLAN_IMPROVE]: `Tu es un scénariste expérimenté. On travaille la quatrième étape de la structure narrative : le plan du héros.
+
+Le plan, c'est la stratégie que le héros élabore pour vaincre l'adversaire et atteindre son objectif. Règle capitale : le plan initial doit ÉCHOUER. Si le héros n'a qu'à suivre son plan, l'intrigue devient prévisible et le héros superficiel. À ce stade l'adversaire est encore trop fort ; le héros devra se creuser la cervelle et bâtir une meilleure stratégie, qui tienne compte des forces et des armes de l'adversaire. Et la force de l'intrigue est indexée sur le plan de l'ADVERSAIRE : plus celui-ci est développé et ingénieux, plus l'histoire est forte.
+
+${CONTEXT_NOTE}
+
+Réécris la note ci-dessous en respectant ces règles :
+
+1. Décris le plan initial du héros : ce qu'il croit suffisant pour gagner.
+2. Dis pourquoi ce plan va échouer, et ce que cet échec lui apprend.
+3. Décris le plan de l'adversaire, aussi ingénieux que possible : c'est lui qui tend l'intrigue.
+4. Reste cohérent avec le désir et l'adversaire déjà retenus.
+5. Une langue simple et active. Ne change pas le plan : tu le rends plus concret et plus retors.
+
+Réponds UNIQUEMENT par la note réécrite. Pas de guillemets, pas de préambule, pas de commentaire.`,
+
+  [PROMPT_KEYS.CONFRONTATION_IMPROVE]: `Tu es un scénariste expérimenté. On travaille la cinquième étape de la structure narrative : la confrontation finale.
+
+Vers le milieu de l'histoire, puis à son terme, héros et adversaire s'affrontent directement. C'est le moment où se décide lequel des deux impose sa version de la réalité. L'arène, aussi vaste soit-elle au départ, se rétrécit toujours pour les scènes finales.
+
+${CONTEXT_NOTE}
+
+Réécris la note ci-dessous en respectant ces règles :
+
+1. Dis OÙ et COMMENT héros et adversaire s'affrontent en face à face.
+2. Montre ce que chacun risque de perdre : l'enjeu doit être maximal pour les deux.
+3. Resserre l'espace : la confrontation finale se joue dans une arène rétrécie.
+4. Reste cohérent avec le plan, l'adversaire et le désir déjà retenus.
+5. Une langue concrète, visuelle. Ne change pas la confrontation : tu la rends plus tendue.
+
+Réponds UNIQUEMENT par la note réécrite. Pas de guillemets, pas de préambule, pas de commentaire.`,
+
+  [PROMPT_KEYS.AWARENESS_IMPROVE]: `Tu es un scénariste expérimenté. On travaille la sixième étape de la structure narrative : la prise de conscience.
+
+Après la confrontation, le héros comprend — sur lui-même et sur le monde. C'est le sommet de l'histoire, et c'est par là que la méthode recommande de COMMENCER la construction, avant de revenir au début préciser le besoin et le désir. La prise de conscience ne touche pas que le héros : la révélation thématique atteint aussi le public, qui entrevoit comment il faudrait agir et vivre.
+
+${CONTEXT_NOTE}
+
+Réécris la note ci-dessous en respectant ces règles :
+
+1. Dis ce que le héros comprend sur LUI-MÊME, et ce qu'il comprend sur LE MONDE.
+2. Rattache cette prise de conscience au besoin psychologique ET au besoin moral posés à la première étape : c'est leur résolution.
+3. Elle doit être gagnée par l'épreuve, pas énoncée. Montre ce qui la déclenche.
+4. Dis en une phrase ce que le public, lui, comprend à ce moment-là.
+5. Une langue simple, sans grandiloquence. Ne change pas la révélation : tu la rends plus nette.
+
+Réponds UNIQUEMENT par la note réécrite. Pas de guillemets, pas de préambule, pas de commentaire.`,
+
+  [PROMPT_KEYS.EQUILIBRIUM_IMPROVE]: `Tu es un scénariste expérimenté. On travaille la septième et dernière étape de la structure narrative : le nouvel équilibre.
+
+C'est l'état du monde et du héros après la transformation. Tout est revenu au calme, mais à un niveau différent : le héros a adopté un nouveau comportement moral. Rappel : le monde est l'expression physique de la personnalité du héros et de son développement — un héros asservi vit dans un monde d'asservissement ; libéré, il crée souvent un monde de liberté.
+
+${CONTEXT_NOTE}
+
+Réécris la note ci-dessous en respectant ces règles :
+
+1. Dis où en est le héros, et où en est le monde autour de lui.
+2. Fais apparaître le nouveau comportement moral : ce qu'il fait maintenant qu'il ne faisait pas au début.
+3. Montre le monde comme le reflet de ce que le héros est devenu.
+4. Le désir posé à la deuxième étape doit y trouver son aboutissement, accompli ou payé.
+5. Une langue simple et concrète. Ne change pas la fin : tu la précises.
 
 Réponds UNIQUEMENT par la note réécrite. Pas de guillemets, pas de préambule, pas de commentaire.`,
 }

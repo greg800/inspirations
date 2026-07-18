@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { useStickyActions } from '../lib/stickyActions.jsx'
+import StepArrows from './StepArrows.jsx'
 import './MobileBottomBar.css'
 
 const HeartIcon = () => (
@@ -19,7 +20,7 @@ export default function MobileBottomBar() {
   const { user } = useAuth()
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { actions } = useStickyActions()
+  const { actions, trail } = useStickyActions()
   const isGallery = pathname === '/'
   const isActivity = pathname === '/activity'
   const isForm = pathname === '/create' || pathname.startsWith('/edit/')
@@ -34,6 +35,19 @@ export default function MobileBottomBar() {
         <button type="button" className="mobile-bottom-btn form-cancel" onClick={() => navigate(-1)}>
           Annuler
         </button>
+      </div>
+    )
+  }
+
+  // Mode étape Storic : retour à gauche, fil d'Ariane du bloc courant à droite.
+  // Cliquer une flèche ouvre directement l'étape correspondante.
+  if (trail) {
+    return (
+      <div className="mobile-bottom-bar trail-mode">
+        <button className="mobile-bottom-btn ghost trail-back" onClick={() => navigate(-1)}>
+          Retour
+        </button>
+        <StepArrows items={trail.items} ariaLabel={trail.ariaLabel} className="trail-bottom" />
       </div>
     )
   }

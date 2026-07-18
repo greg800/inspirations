@@ -40,6 +40,7 @@ model Story {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // Bloc « Prémisse »
   premises        Premise[]
   depths          Depth[]
   problems        Problem[]
@@ -50,6 +51,14 @@ model Story {
   transformations Transformation[]
   dilemmas        Dilemma[]
   receptions      Reception[]
+  // Bloc « Structure » — les 7 étapes de la charpente narrative
+  weaknesses      Weakness[]
+  desires         Desire[]
+  adversaries     Adversary[]
+  heroPlans       HeroPlan[]
+  confrontations  Confrontation[]
+  awarenesses     Awareness[]
+  equilibriums    Equilibrium[]
 }
 
 // Toutes les étapes du pipeline d'écriture ont la même forme : un texte, une
@@ -157,6 +166,86 @@ model Reception {
 
 // Une prémisse candidate pour une histoire. Note de 0 à 20, 10 par défaut.
 model Premise {
+  id        Int      @id @default(autoincrement())
+  text      String
+  summary   String?
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Les 7 étapes de la structure narrative — même forme que les précédentes.
+// Faiblesse et besoin, désir, adversaire, plan du héros, confrontation finale,
+// prise de conscience, nouvel équilibre.
+model Weakness {
+  id        Int      @id @default(autoincrement())
+  text      String
+  summary   String?
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Desire {
+  id        Int      @id @default(autoincrement())
+  text      String
+  summary   String?
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Adversary {
+  id        Int      @id @default(autoincrement())
+  text      String
+  summary   String?
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HeroPlan {
+  id        Int      @id @default(autoincrement())
+  text      String
+  summary   String?
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Confrontation {
+  id        Int      @id @default(autoincrement())
+  text      String
+  summary   String?
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Awareness {
+  id        Int      @id @default(autoincrement())
+  text      String
+  summary   String?
+  score     Int      @default(10)
+  storyId   Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Equilibrium {
   id        Int      @id @default(autoincrement())
   text      String
   summary   String?

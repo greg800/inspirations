@@ -25,6 +25,13 @@ import sequenceRouter from './routes/sequence.js'
 import transformationRouter from './routes/transformation.js'
 import dilemmaRouter from './routes/dilemma.js'
 import receptionRouter from './routes/reception.js'
+import weaknessRouter from './routes/weakness.js'
+import desireRouter from './routes/desire.js'
+import adversaryRouter from './routes/adversary.js'
+import planRouter from './routes/plan.js'
+import confrontationRouter from './routes/confrontation.js'
+import awarenessRouter from './routes/awareness.js'
+import equilibriumRouter from './routes/equilibrium.js'
 import storyContextRouter from './routes/storyContext.js'
 import aiRouter from './routes/ai.js'
 
@@ -62,6 +69,13 @@ app.use('/api/stories/:storyId/sequence', sequenceRouter)
 app.use('/api/stories/:storyId/transformation', transformationRouter)
 app.use('/api/stories/:storyId/dilemma', dilemmaRouter)
 app.use('/api/stories/:storyId/reception', receptionRouter)
+app.use('/api/stories/:storyId/weakness', weaknessRouter)
+app.use('/api/stories/:storyId/desire', desireRouter)
+app.use('/api/stories/:storyId/adversary', adversaryRouter)
+app.use('/api/stories/:storyId/plan', planRouter)
+app.use('/api/stories/:storyId/confrontation', confrontationRouter)
+app.use('/api/stories/:storyId/awareness', awarenessRouter)
+app.use('/api/stories/:storyId/equilibrium', equilibriumRouter)
 app.use('/api/stories/:storyId/context-summary', storyContextRouter)
 app.use('/api/ai', aiRouter)
 

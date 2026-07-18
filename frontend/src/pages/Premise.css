@@ -2,6 +2,11 @@
   padding: 32px 0 120px;
 }
 
+/* Fil d'Ariane des 7 blocs de la méthode, en tête de page */
+.trail-blocks {
+  margin-bottom: 20px;
+}
+
 .premise-eyebrow {
   font-size: 12px;
   font-weight: 700;

@@ -90,6 +90,57 @@ export const STEPS = [
     ctxAll: 'Notes sur la réception du public (les mieux notées comptent le plus)',
     ctxWritten: 'Autres notes de réception déjà écrites',
   },
+
+  // ---- Bloc « Structure » : les 7 étapes de la charpente narrative ----
+  {
+    key: 'weakness', model: 'weakness', promptKey: PROMPT_KEYS.WEAKNESS_IMPROVE,
+    feature: 'Faiblesse et besoin — améliorer et ajouter', notFound: 'Note introuvable',
+    contextMode: 'best',
+    ctxRetained: 'Faiblesse et besoin retenus',
+    ctxWritten: 'Autres notes sur la faiblesse et le besoin déjà écrites',
+  },
+  {
+    key: 'desire', model: 'desire', promptKey: PROMPT_KEYS.DESIRE_IMPROVE,
+    feature: 'Désir — améliorer et ajouter', notFound: 'Désir introuvable',
+    contextMode: 'best',
+    ctxRetained: 'Désir retenu',
+    ctxWritten: 'Autres formulations du désir déjà proposées',
+  },
+  {
+    key: 'adversary', model: 'adversary', promptKey: PROMPT_KEYS.ADVERSARY_IMPROVE,
+    feature: 'Adversaire — améliorer et ajouter', notFound: 'Adversaire introuvable',
+    contextMode: 'all',
+    ctxAll: 'Adversaires proposés (les mieux notés comptent le plus)',
+    ctxWritten: 'Autres adversaires déjà proposés',
+  },
+  {
+    key: 'plan', model: 'heroPlan', promptKey: PROMPT_KEYS.PLAN_IMPROVE,
+    feature: 'Plan du héros — améliorer et ajouter', notFound: 'Plan introuvable',
+    contextMode: 'best',
+    ctxRetained: 'Plan du héros retenu',
+    ctxWritten: 'Autres plans déjà proposés',
+  },
+  {
+    key: 'confrontation', model: 'confrontation', promptKey: PROMPT_KEYS.CONFRONTATION_IMPROVE,
+    feature: 'Confrontation finale — améliorer et ajouter', notFound: 'Note introuvable',
+    contextMode: 'best',
+    ctxRetained: 'Confrontation finale retenue',
+    ctxWritten: 'Autres confrontations déjà proposées',
+  },
+  {
+    key: 'awareness', model: 'awareness', promptKey: PROMPT_KEYS.AWARENESS_IMPROVE,
+    feature: 'Prise de conscience — améliorer et ajouter', notFound: 'Note introuvable',
+    contextMode: 'best',
+    ctxRetained: 'Prise de conscience retenue',
+    ctxWritten: 'Autres prises de conscience déjà proposées',
+  },
+  {
+    key: 'equilibrium', model: 'equilibrium', promptKey: PROMPT_KEYS.EQUILIBRIUM_IMPROVE,
+    feature: 'Nouvel équilibre — améliorer et ajouter', notFound: 'Note introuvable',
+    contextMode: 'best',
+    ctxRetained: 'Nouvel équilibre retenu',
+    ctxWritten: 'Autres fins déjà proposées',
+  },
 ]
 
 export function stepByKey(key) {

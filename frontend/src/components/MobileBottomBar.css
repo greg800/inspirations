@@ -127,3 +127,30 @@
   color: var(--color-text);
   border: 1.5px solid var(--color-border);
 }
+
+/* Mode étape Storic : bouton retour compact à gauche, fil d'Ariane à droite */
+.mobile-bottom-bar.trail-mode {
+  gap: 12px;
+}
+
+.mobile-bottom-bar.trail-mode .trail-back {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 10px 18px;
+}
+
+.mobile-bottom-bar.trail-mode .arrow-trail {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .mobile-bottom-bar.trail-mode {
+    gap: 8px;
+  }
+
+  .mobile-bottom-bar.trail-mode .trail-back {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}

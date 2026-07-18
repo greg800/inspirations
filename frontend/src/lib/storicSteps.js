@@ -3,8 +3,9 @@
 // entrée backend. Chaque étape porte tout ce dont la page a besoin.
 //
 // - key        identifiant (route /storic/:storyId/<key>, sauf premise à la racine)
+// - block      bloc de la méthode auquel l'étape appartient (voir STORIC_BLOCKS)
 // - path       sous-chemin API (premises, depths, problems…)
-// - label      libellé court (bandeau « où vous en êtes »)
+// - label      libellé court (bandeau « où vous en êtes », fil d'Ariane du bas)
 // - title      titre de la page
 // - subtitle   phrase de la méthode qui cadre l'étape
 // - guidance   aides détaillées pour bien remplir (puces)
@@ -13,11 +14,23 @@
 // - promptKey  clé du prompt IA (page crayon)
 // - ctaImprove libellé du bouton IA
 // - ctaAdd     libellé du bouton « ajouter tel quel »
-// - next       { key, label } de l'étape suivante, ou null pour la dernière
+
+// Les 7 grands blocs de la méthode, dans l'ordre — fil d'Ariane du header.
+// `pending` : bloc pas encore développé (flèche grise, non cliquable).
+export const STORIC_BLOCKS = [
+  { key: 'premise', letter: 'P', label: 'Prémisse' },
+  { key: 'structure', letter: 'S', label: 'Structure' },
+  { key: 'hero', letter: 'H', label: 'Héros', pending: true },
+  { key: 'theme', letter: 'T', label: 'Thème et univers', pending: true },
+  { key: 'plot', letter: 'I', label: 'Intrigue', pending: true },
+  { key: 'scene', letter: 'S', label: 'Scène', pending: true },
+  { key: 'dialogue', letter: 'D', label: 'Dialogues', pending: true },
+]
 
 export const STORIC_STEPS = [
   {
     key: 'premise',
+    block: 'premise',
     path: 'premises',
     label: 'Prémisse',
     title: 'Prémisse',
@@ -33,10 +46,10 @@ export const STORIC_STEPS = [
     promptKey: 'premise_improve',
     ctaImprove: 'Simplifier et améliorer le style',
     ctaAdd: 'Ajouter sans modifier',
-    next: { key: 'depth', label: 'Évaluer la profondeur' },
   },
   {
     key: 'depth',
+    block: 'premise',
     path: 'depths',
     label: 'Profondeur',
     title: 'Profondeur',
@@ -52,10 +65,10 @@ export const STORIC_STEPS = [
     promptKey: 'depth_improve',
     ctaImprove: 'Améliorer et ajouter',
     ctaAdd: 'Ajouter',
-    next: { key: 'problems', label: 'Évaluer les problèmes et défis' },
   },
   {
     key: 'problems',
+    block: 'premise',
     path: 'problems',
     label: 'Problèmes et défis',
     title: 'Problèmes et défis',
@@ -71,10 +84,10 @@ export const STORIC_STEPS = [
     promptKey: 'problems_improve',
     ctaImprove: 'Améliorer et ajouter',
     ctaAdd: 'Ajouter',
-    next: { key: 'principle', label: 'Définir le principe directeur' },
   },
   {
     key: 'principle',
+    block: 'premise',
     path: 'principle',
     label: 'Principe directeur',
     title: 'Principe directeur',
@@ -90,10 +103,10 @@ export const STORIC_STEPS = [
     promptKey: 'principle_improve',
     ctaImprove: 'Améliorer et ajouter',
     ctaAdd: 'Ajouter',
-    next: { key: 'character', label: 'Choisir le meilleur personnage' },
   },
   {
     key: 'character',
+    block: 'premise',
     path: 'character',
     label: 'Meilleur personnage',
     title: 'Meilleur personnage',
@@ -109,10 +122,10 @@ export const STORIC_STEPS = [
     promptKey: 'character_improve',
     ctaImprove: 'Améliorer et ajouter',
     ctaAdd: 'Ajouter',
-    next: { key: 'conflict', label: 'Cerner le conflit central' },
   },
   {
     key: 'conflict',
+    block: 'premise',
     path: 'conflict',
     label: 'Conflit central',
     title: 'Conflit central',
@@ -128,10 +141,10 @@ export const STORIC_STEPS = [
     promptKey: 'conflict_improve',
     ctaImprove: 'Améliorer et ajouter',
     ctaAdd: 'Ajouter',
-    next: { key: 'sequence', label: 'Décrire la séquence de cause à effet' },
   },
   {
     key: 'sequence',
+    block: 'premise',
     path: 'sequence',
     label: 'Séquence de cause à effet',
     title: 'Séquence unique de cause à effet',
@@ -147,10 +160,10 @@ export const STORIC_STEPS = [
     promptKey: 'sequence_improve',
     ctaImprove: 'Améliorer et ajouter',
     ctaAdd: 'Ajouter',
-    next: { key: 'transformation', label: 'Explorer la transformation du héros' },
   },
   {
     key: 'transformation',
+    block: 'premise',
     path: 'transformation',
     label: 'Transformation du héros',
     title: 'Transformation du héros',
@@ -166,10 +179,10 @@ export const STORIC_STEPS = [
     promptKey: 'transformation_improve',
     ctaImprove: 'Améliorer et ajouter',
     ctaAdd: 'Ajouter',
-    next: { key: 'dilemma', label: 'Définir le dilemme moral' },
   },
   {
     key: 'dilemma',
+    block: 'premise',
     path: 'dilemma',
     label: 'Dilemme moral',
     title: 'Dilemme moral',
@@ -185,10 +198,10 @@ export const STORIC_STEPS = [
     promptKey: 'dilemma_improve',
     ctaImprove: 'Améliorer et ajouter',
     ctaAdd: 'Ajouter',
-    next: { key: 'reception', label: 'Penser à la réception du public' },
   },
   {
     key: 'reception',
+    block: 'premise',
     path: 'reception',
     label: 'Réception du public',
     title: 'Réception du public',
@@ -204,7 +217,141 @@ export const STORIC_STEPS = [
     promptKey: 'reception_improve',
     ctaImprove: 'Améliorer et ajouter',
     ctaAdd: 'Ajouter',
-    next: null,
+  },
+
+  // ---- Bloc « Structure » : les 7 étapes de la charpente narrative ----
+  {
+    key: 'weakness',
+    block: 'structure',
+    path: 'weakness',
+    label: 'Faiblesse et besoin',
+    title: 'Faiblesse et besoin',
+    subtitle: "Le héros a des faiblesses importantes qu'il tentera de supprimer au fil de l'histoire.",
+    guidance: [
+      "Deux besoins, pas un. Le besoin PSYCHOLOGIQUE : régler un défaut qui le fait souffrir lui. Le besoin MORAL : apprendre à ne plus faire souffrir les autres.",
+      "Le test qui tranche : il n'y a besoin moral QUE si le héros blesse au moins un autre personnage au début. Sinon, la faiblesse n'est que psychologique — et c'est l'erreur la plus fréquente.",
+      "Ordre de construction : partez du besoin psychologique, déduisez-en la faiblesse morale qu'il entraîne, puis le besoin moral.",
+      "Exemple (Le Silence des agneaux) : Clarice est inexpérimentée et hantée par ses souvenirs d'enfance ; elle a besoin de vaincre ses peurs pour devenir une professionnelle respectée.",
+    ],
+    placeholder: "Quelle est sa faiblesse ? Son besoin psychologique ? Qui blesse-t-il au début ?",
+    tableHeader: 'Faiblesse et besoin',
+    promptKey: 'weakness_improve',
+    ctaImprove: 'Améliorer et ajouter',
+    ctaAdd: 'Ajouter',
+  },
+  {
+    key: 'desire',
+    block: 'structure',
+    path: 'desire',
+    label: 'Désir',
+    title: 'Désir',
+    subtitle: "Ce que le héros veut obtenir à tout prix : la piste que le public suit d'un bout à l'autre.",
+    guidance: [
+      "Le désir naît du besoin : un lion a besoin de manger, il voit une antilope, il désire l'attraper.",
+      "Désir et besoin ne sont pas au même niveau. Le désir est ce que le public croit être le sujet — la surface. Le besoin reste invisible, sous la surface : c'est le vrai sujet.",
+      "Trois règles : une SEULE ligne de désir, un désir PRÉCIS, et un désir ACCOMPLI à la fin.",
+      "Précis veut dire vérifiable : on doit pouvoir dire à la dernière page s'il l'a obtenu ou non.",
+    ],
+    placeholder: "Que veut le héros, précisément, du début à la fin ?",
+    tableHeader: 'Désir',
+    promptKey: 'desire_improve',
+    ctaImprove: 'Améliorer et ajouter',
+    ctaAdd: 'Ajouter',
+  },
+  {
+    key: 'adversary',
+    block: 'structure',
+    path: 'adversary',
+    label: 'Adversaire',
+    title: 'Adversaire',
+    subtitle: "L'adversaire n'incarne pas le mal : c'est un concurrent qui veut le même objectif que le héros.",
+    guidance: [
+      "Méthode : partez de l'objectif du héros. Toute personne qui cherche à l'empêcher de l'atteindre est un adversaire.",
+      "Héros et adversaire se battent pour imposer leur version de la réalité. Comme au tennis, la partie n'est intéressante qu'avec deux excellents joueurs.",
+      "Multipliez : un adversaire principal et deux secondaires. Avec quatre personnages, il y a six relations ; avec un seul adversaire, une seule.",
+      "Pour chaque adversaire, déterminez les mêmes cinq attributs que pour le héros : faiblesse, besoin, désir, valeurs, transformation.",
+    ],
+    placeholder: "Qui veut la même chose que le héros, et pourquoi a-t-il raison de la vouloir ?",
+    tableHeader: 'Adversaire',
+    promptKey: 'adversary_improve',
+    ctaImprove: 'Améliorer et ajouter',
+    ctaAdd: 'Ajouter',
+  },
+  {
+    key: 'plan',
+    block: 'structure',
+    path: 'plan',
+    label: 'Plan du héros',
+    title: 'Plan du héros',
+    subtitle: "La stratégie que le héros élabore pour vaincre l'adversaire et atteindre son objectif.",
+    guidance: [
+      "Le plan initial DOIT échouer. Si le héros n'a qu'à le suivre, l'intrigue devient prévisible et le héros superficiel.",
+      "À ce stade l'adversaire est encore trop fort : le héros devra se creuser la cervelle et bâtir une meilleure stratégie, qui tienne compte des armes de l'adversaire.",
+      "Décrivez aussi le plan de l'ADVERSAIRE : la force de l'intrigue est indexée dessus. Plus il est développé et ingénieux, plus l'histoire est forte.",
+      "Un plan se raconte en actes concrets, pas en intentions.",
+    ],
+    placeholder: "Quel est son plan ? Pourquoi va-t-il échouer ? Et quel est le plan de l'adversaire ?",
+    tableHeader: 'Plan du héros',
+    promptKey: 'plan_improve',
+    ctaImprove: 'Améliorer et ajouter',
+    ctaAdd: 'Ajouter',
+  },
+  {
+    key: 'confrontation',
+    block: 'structure',
+    path: 'confrontation',
+    label: 'Confrontation finale',
+    title: 'Confrontation finale',
+    subtitle: "Vers le milieu de l'histoire, puis à son terme, héros et adversaire s'affrontent directement.",
+    guidance: [
+      "C'est là que se décide lequel des deux impose sa version de la réalité.",
+      "L'enjeu doit être maximal pour les deux camps : dites ce que chacun risque de perdre.",
+      "L'arène se rétrécit toujours pour les scènes finales, aussi vaste soit-elle au départ.",
+      "Cherchez le face-à-face physique, pas l'affrontement d'idées à distance.",
+    ],
+    placeholder: "Où et comment s'affrontent-ils ? Que risque chacun ?",
+    tableHeader: 'Confrontation finale',
+    promptKey: 'confrontation_improve',
+    ctaImprove: 'Améliorer et ajouter',
+    ctaAdd: 'Ajouter',
+  },
+  {
+    key: 'awareness',
+    block: 'structure',
+    path: 'awareness',
+    label: 'Prise de conscience',
+    title: 'Prise de conscience',
+    subtitle: "Le héros comprend — sur lui-même, et sur le monde.",
+    guidance: [
+      "C'est le sommet de l'histoire. La méthode recommande d'ailleurs de COMMENCER la construction par là, puis de revenir au début préciser le besoin et le désir.",
+      "Elle résout les deux besoins posés à la première étape : le psychologique et le moral.",
+      "Elle doit être gagnée par l'épreuve, jamais énoncée. Dites ce qui la déclenche.",
+      "La révélation ne touche pas que le héros : le public aussi entrevoit comment il faudrait agir et vivre. Nommez ce qu'il comprend, lui.",
+    ],
+    placeholder: "Que comprend le héros sur lui-même, et sur le monde ?",
+    tableHeader: 'Prise de conscience',
+    promptKey: 'awareness_improve',
+    ctaImprove: 'Améliorer et ajouter',
+    ctaAdd: 'Ajouter',
+  },
+  {
+    key: 'equilibrium',
+    block: 'structure',
+    path: 'equilibrium',
+    label: 'Nouvel équilibre',
+    title: 'Nouvel équilibre',
+    subtitle: "L'état du monde et du héros après la transformation.",
+    guidance: [
+      "Tout revient au calme, mais à un niveau différent : le héros a adopté un nouveau comportement moral.",
+      "Montrez ce qu'il fait maintenant qu'il ne faisait pas au début. C'est la preuve de la transformation.",
+      "Le monde est l'expression physique de ce qu'est devenu le héros : un héros libéré crée souvent un monde de liberté.",
+      "Le désir posé à la deuxième étape doit trouver ici son aboutissement — accompli, ou payé.",
+    ],
+    placeholder: "Où en sont le héros et le monde à la fin ?",
+    tableHeader: 'Nouvel équilibre',
+    promptKey: 'equilibrium_improve',
+    ctaImprove: 'Améliorer et ajouter',
+    ctaAdd: 'Ajouter',
   },
 ]
 
@@ -214,6 +361,27 @@ export function stepByKey(key) {
 
 export function stepIndex(key) {
   return STORIC_STEPS.findIndex(s => s.key === key)
+}
+
+// Les étapes d'un bloc, dans l'ordre du pipeline.
+export function stepsOfBlock(blockKey) {
+  return STORIC_STEPS.filter(s => s.block === blockKey)
+}
+
+// Chemin d'une étape : la prémisse vit à la racine de l'histoire.
+export function stepPath(storyId, stepKey) {
+  return stepKey === 'premise' ? `/storic/${storyId}` : `/storic/${storyId}/${stepKey}`
+}
+
+/**
+ * Avancement d'un bloc, de 0 à 1 : la part de ses étapes qui portent au moins
+ * un élément. `filled` est un Set des clés d'étapes déjà renseignées.
+ * Un bloc pas encore développé n'a aucune étape — il reste à 0.
+ */
+export function blockProgress(blockKey, filled) {
+  const steps = stepsOfBlock(blockKey)
+  if (steps.length === 0) return 0
+  return steps.filter(s => filled.has(s.key)).length / steps.length
 }
 
 // La prémisse et le principe directeur s'affichent en entier dans « Où vous en
