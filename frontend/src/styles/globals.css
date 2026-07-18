@@ -15,8 +15,9 @@
   --color-cta-text: #FFFFFF;
   --color-border: #E8E3DC;
   /* Avancement des fils d'Ariane de Storic — vert assez clair pour laisser
-     lire une étiquette sombre par-dessus. */
+     lire une étiquette sombre par-dessus. Le foncé marque l'étape courante. */
   --color-progress: #A9D9B4;
+  --color-progress-dark: #3F7D52;
   --radius: 8px;
   --max-width: 1200px;
 }

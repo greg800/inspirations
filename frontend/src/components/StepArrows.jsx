@@ -29,8 +29,12 @@ export default function StepArrows({ items, className = '', ariaLabel }) {
           aria-label={item.title}
           aria-current={item.active ? 'step' : undefined}
         >
-          <span className="arrow-fill" style={{ width: `${Math.round(item.progress * 100)}%` }} />
-          <span className="arrow-label">{item.label}</span>
+          {/* Couche interne : elle porte le fond et se rétracte de 2px quand
+              l'étape est active, découvrant le liseré vert foncé du bouton. */}
+          <span className="arrow-inner">
+            <span className="arrow-fill" style={{ width: `${Math.round(item.progress * 100)}%` }} />
+            <span className="arrow-label">{item.label}</span>
+          </span>
         </button>
       ))}
     </nav>

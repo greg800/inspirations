@@ -1,32 +1,24 @@
 /* Fil d'Ariane en flèches imbriquées.
    Chaque segment est un chevron : pointe à droite, encoche à gauche pour
-   recevoir la pointe du précédent. Un chevauchement négatif les emboîte. */
+   recevoir la pointe du précédent. Un chevauchement négatif les emboîte.
+
+   Le chevron est découpé au clip-path, qui rognerait une bordure CSS. Le
+   liseré de l'étape courante est donc obtenu en superposant deux couches :
+   le bouton porte la couleur du liseré, la couche interne porte le fond et
+   se rétracte de 2px quand l'étape est active. */
 
 .arrow-trail {
   --notch: 10px;
   --gap: 3px;
+  --edge: 2px;
   display: flex;
   align-items: stretch;
   width: 100%;
   min-width: 0;
 }
 
-.arrow-seg {
-  position: relative;
-  flex: 1 1 0;
-  min-width: 0;
-  height: 30px;
-  margin-left: calc(var(--gap) - var(--notch));
-  padding: 0 var(--notch) 0 calc(var(--notch) + 2px);
-  border: none;
-  background: var(--color-border);
-  color: var(--color-text-secondary);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  overflow: hidden;
+.arrow-seg,
+.arrow-inner {
   clip-path: polygon(
     0 0,
     calc(100% - var(--notch)) 0,
@@ -38,9 +30,8 @@
 }
 
 /* La première flèche n'a personne à recevoir : bord gauche droit. */
-.arrow-seg.first {
-  margin-left: 0;
-  padding-left: 10px;
+.arrow-seg.first,
+.arrow-seg.first .arrow-inner {
   clip-path: polygon(
     0 0,
     calc(100% - var(--notch)) 0,
@@ -48,6 +39,53 @@
     calc(100% - var(--notch)) 100%,
     0 100%
   );
+}
+
+.arrow-seg {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 30px;
+  margin-left: calc(var(--gap) - var(--notch));
+  padding: 0;
+  border: none;
+  /* Transparent au repos : ne se voit que sous l'étape courante, en liseré. */
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.arrow-seg.first {
+  margin-left: 0;
+}
+
+.arrow-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--notch) 0 calc(var(--notch) + 2px);
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.arrow-seg.first .arrow-inner {
+  padding-left: 10px;
+}
+
+/* Étape courante : liseré vert foncé épousant le chevron. */
+.arrow-seg.active {
+  background: var(--color-progress-dark);
+  color: var(--color-cta);
+}
+
+.arrow-seg.active .arrow-inner {
+  inset: var(--edge);
 }
 
 /* Remplissage vert, de la gauche vers la droite, au prorata de l'avancement. */
@@ -62,7 +100,7 @@
 
 .arrow-label {
   position: relative;
-  display: block;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -70,17 +108,6 @@
 
 .arrow-seg:hover:not(.disabled) {
   color: var(--color-text);
-}
-
-/* Étape courante : soulignée par un liseré, texte plein contraste. */
-.arrow-seg.active {
-  color: var(--color-cta);
-}
-
-.arrow-seg.active .arrow-label {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 2px;
 }
 
 /* Bloc pas encore développé : présent sur la carte, mais inerte. */
@@ -100,13 +127,15 @@
 
   .arrow-seg {
     height: 28px;
-    padding: 0 3px 0 calc(var(--notch) + 1px);
     font-size: 11px;
     letter-spacing: 0;
-    text-align: center;
   }
 
-  .arrow-seg.first {
+  .arrow-inner {
+    padding: 0 3px 0 calc(var(--notch) + 1px);
+  }
+
+  .arrow-seg.first .arrow-inner {
     padding-left: 4px;
   }
 }
