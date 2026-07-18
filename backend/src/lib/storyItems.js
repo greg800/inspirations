@@ -7,16 +7,10 @@ import { buildContext, buildUserMessage, stepHasSummary, backfillSummaries } fro
 
 const prisma = new PrismaClient()
 
-export const MAX_WORDS = 200
-
-export function countWords(text) {
-  return text.trim().split(/\s+/).filter(Boolean).length
-}
-
 /**
  * Chaque étape du pipeline (prémisse, profondeur, …) est une liste de la même
- * forme rattachée à une histoire : un texte de 200 mots maximum, une note de 0 à
- * 20, ajoutable telle quelle ou après passage par l'IA. Cette fabrique construit
+ * forme rattachée à une histoire : un texte de longueur libre, une note de 0 à
+ * 20, ajoutable tel quel ou après passage par l'IA. Cette fabrique construit
  * le routeur commun à partir d'une entrée de STEPS (voir lib/steps.js).
  */
 export function createStoryItemRouter(step) {
@@ -35,7 +29,6 @@ export function createStoryItemRouter(step) {
 
   function validateText(text) {
     if (!text || !text.trim()) return 'Texte requis'
-    if (countWords(text) > MAX_WORDS) return `Le texte ne doit pas dépasser ${MAX_WORDS} mots`
     return null
   }
 

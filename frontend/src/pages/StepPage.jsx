@@ -6,8 +6,6 @@ import { useStickyActions } from '../lib/stickyActions.jsx'
 import { stepByKey, stepIndex, stepHasSummary, STORIC_STEPS } from '../lib/storicSteps.js'
 import './Premise.css'
 
-const MAX_WORDS = 200
-
 function countWords(text) {
   return text.trim().split(/\s+/).filter(Boolean).length
 }
@@ -64,7 +62,6 @@ export default function StepPage({ firstStep }) {
   }
 
   const words = countWords(draft)
-  const overLimit = words > MAX_WORDS
   const busy = improving || adding
 
   useEffect(() => {
@@ -120,7 +117,7 @@ export default function StepPage({ firstStep }) {
   }
 
   async function addAsIs() {
-    if (!draft.trim() || overLimit || busy) return
+    if (!draft.trim() || busy) return
     setError('')
     setAdding(true)
     try {
@@ -133,7 +130,7 @@ export default function StepPage({ firstStep }) {
   }
 
   async function improve() {
-    if (!draft.trim() || overLimit || busy) return
+    if (!draft.trim() || busy) return
     setError('')
     setImproving(true)
     try {
@@ -235,15 +232,15 @@ export default function StepPage({ firstStep }) {
 
         <div className="premise-compose">
           <textarea
-            className={`premise-input${overLimit ? ' over' : ''}`}
+            className="premise-input"
             value={draft}
             onChange={e => setDraft(e.target.value)}
             placeholder={step.placeholder}
             rows={5}
             disabled={busy}
           />
-          <div className={`premise-count${overLimit ? ' over' : ''}`}>
-            {words} / {MAX_WORDS} mots
+          <div className="premise-count">
+            {words} mot{words > 1 ? 's' : ''}
           </div>
 
           <div className="premise-cta-row">
@@ -251,7 +248,7 @@ export default function StepPage({ firstStep }) {
               <button
                 className="premise-btn"
                 onClick={improve}
-                disabled={!draft.trim() || overLimit || busy}
+                disabled={!draft.trim() || busy}
               >
                 {improving ? 'L’IA travaille…' : step.ctaImprove}
               </button>
@@ -268,7 +265,7 @@ export default function StepPage({ firstStep }) {
             <button
               className="premise-btn ghost"
               onClick={addAsIs}
-              disabled={!draft.trim() || overLimit || busy}
+              disabled={!draft.trim() || busy}
             >
               {adding ? 'Ajout…' : step.ctaAdd}
             </button>
@@ -327,8 +324,8 @@ export default function StepPage({ firstStep }) {
               onChange={e => setEditText(e.target.value)}
               rows={5}
             />
-            <div className={`premise-count${countWords(editText) > MAX_WORDS ? ' over' : ''}`}>
-              {countWords(editText)} / {MAX_WORDS} mots
+            <div className="premise-count">
+              {countWords(editText)} mot{countWords(editText) > 1 ? 's' : ''}
             </div>
 
             <label className="premise-label" htmlFor="step-edit-score">Note sur 20</label>
@@ -347,7 +344,7 @@ export default function StepPage({ firstStep }) {
               <button
                 className="premise-btn"
                 onClick={saveEdit}
-                disabled={!editText.trim() || countWords(editText) > MAX_WORDS || saving}
+                disabled={!editText.trim() || saving}
               >
                 {saving ? 'Enregistrement…' : 'Enregistrer'}
               </button>
